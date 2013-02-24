@@ -1,0 +1,19 @@
+        LDC 24044
+        ldc 18568
+
+        st 1
+        st 0
+rec:
+        ld 0
+        ld 1
+        br next
+        hlt
+next:
+        ld 1
+        mod
+        ld 1
+        st 0
+        st 1
+        jmp rec
+
+
