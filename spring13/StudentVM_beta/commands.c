@@ -12,7 +12,6 @@ typedef struct Command
     int id;
     Opcode opcode;
     CommandArg arg;
-    char *labeled;
 
     pCommand next;
 } Command;
@@ -42,9 +41,16 @@ pCommand createCommand(void)
     pCommand command = (pCommand) malloc(sizeof(Command));
     command->id = 0;
     command->opcode = ERR;
-    command->labeled = NULL;
+    command->arg.number = 0;
     command->next = NULL;
     return command;
+}
+
+CommandArg createCommandArg(void)
+{
+    CommandArg arg;
+    arg.number = 0;
+    return arg;
 }
 
 void deleteCommands(pCommands commands)
@@ -70,16 +76,10 @@ void freeCommand(pCommand command)
 
 void clearCommand(pCommand command)
 {
-    if (command != NULL)
+    if (command != NULL && ((command->opcode == BR || command->opcode == JMP || command->opcode == LBL)
+                            && (command->arg.label != NULL)))
     {
-        if (command->labeled != NULL)
-        {
-            free(command->labeled);
-        }
-        if ((command->opcode == BR || command->opcode == JMP) && (command->arg.label != NULL))
-        {
-            free(command->arg.label);
-        }
+        free(command->arg.label);
     }
 }
 
@@ -116,7 +116,7 @@ void pushCommand(pCommands commands, pCommand command)
         command->id = 1;
         return;
     }
-    command->id = commands->tail->id + 1;
+    command->id = commands->tail->id + ((commands->tail->opcode == LBL) ? 0 : 1);
     commands->tail->next = command;
     commands->tail = command;
 }
@@ -127,21 +127,6 @@ void setNextCommand(pCommand command, pCommand next)
     {
         command->next = next;
     }
-}
-
-int isLabel(pCommand command)
-{
-    return command->labeled != NULL;
-}
-
-void setLabel(pCommand command, char *label)
-{
-    command->labeled = label;
-}
-
-char *getLabel(pCommand command)
-{
-    return (command != NULL) ? command->labeled : NULL;
 }
 
 pCommand getNextCommand(pCommand command)
@@ -186,7 +171,6 @@ void printCommands(FILE *output, pCommands commands)
     pCommand com = commands->head;
     while (com != NULL)
     {
-        fprintf(output, ((com->id <= 9) ? " %d." : "%d."), com->id);
         printCommand(output, com);
         com = com->next;
     }
@@ -203,6 +187,7 @@ void printCommand(FILE *output, pCommand command)
             jumpID = to->id;
         }
     }
+    fprintf(output, "#%d", command->id);
     switch (command->opcode)
     {
     case LDC: fprintf(output, "\t\t[LDC] (%d)\n", command->arg.number); break;
@@ -220,6 +205,7 @@ void printCommand(FILE *output, pCommand command)
     case JMP: fprintf(output, "\t\t[JMP] (%d)\n", jumpID); break;
     case BR:  fprintf(output, "\t\t[BR]  (%d)\n", jumpID); break;
     case HLT: fprintf(output, "\t\t[HLT]\n"); break;
+    case LBL: fprintf(output, "\t\t[LBL]\n"); break;
     case ERR: fprintf(output, "ERROR\n"); break;
     default:  fprintf(output, "ERROR\n"); break;
     }

@@ -21,6 +21,7 @@ void printError(FILE *output, ErrorType errType, unsigned int step, unsigned int
     case NO_HLT: fprintf(output, "There's no HALT command\n"); break;
     case NO_RESULT: fprintf(output, "There's no result of performing\n"); break;
     case DIVISION_BY_ZERO: fprintf(output, "Division by zero [command(#%d), step(#%d)]\n", step, commandNum); break;
+    case UNEXPECTED_QUIT: fprintf(output, "Unexpected quit\n");
     default: fprintf(output, "Unknown error\n"); break;
     }
 }

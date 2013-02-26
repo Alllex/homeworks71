@@ -25,7 +25,7 @@ typedef struct
 {
     pStack stack;
     pMemory memory;
-    unsigned int IP;
+    pCommand IP;
 } StateVM;
 
 typedef struct

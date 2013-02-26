@@ -1,0 +1,13 @@
+        ldc 1
+        br then
+        jmp else
+then:
+        ldc 11
+        st 0
+        jmp end
+else:
+        ldc 10
+        st 0
+end:
+        ldc 100
+        hlt

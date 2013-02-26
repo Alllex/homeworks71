@@ -1,0 +1,31 @@
+        ldc 7
+        st 0
+        ldc 0
+        st 1
+        ldc 1
+        st 2
+        ldc 0
+        st 3
+while:
+        ld 0
+        ldc 1
+        sub
+        st 0
+        ld 0
+        br loop
+        jmp end
+loop:
+        ld 1
+        ld 2
+        add
+        ld 2
+        st 1
+        st 2
+        ld 3
+        ld 1
+        add
+        st 3
+        jmp while
+end:
+        ld 3
+        hlt

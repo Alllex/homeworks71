@@ -10,6 +10,8 @@
 void printStateVM(FILE *output, VM *vm)
 {
     fprintf(output, "VM state:\n");
+    fprintf(output, "Next command");
+    printCommand(output, vm->state->IP);
     printStackState(output, vm->state->stack);
     printMemoryState(output, vm->state->memory);
     //printCommands(output, vm->program->commands);

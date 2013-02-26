@@ -1,0 +1,51 @@
+        ldc 500
+        ldc 1
+        sub
+        st 0
+        ldc 3
+        st 1
+        ld 0
+        br while
+        ldc 2
+        st 1
+        jmp end
+while:
+        ld 0
+        ldc 1
+        sub
+        st 0
+        ld 0
+        br loopwhile
+        jmp end
+loopwhile:
+        ld 1
+        ldc 2
+        add
+        st 1
+        ld 1
+        ldc 2
+        div
+        ldc 1
+        sub
+        st 2
+next:
+        ld 2
+        ldc 1
+        cmp
+        br check1
+        jmp while
+check1:
+        ld 1
+        ld 2
+        mod
+        br check2
+        jmp loopwhile
+check2:
+        ld 2
+        ldc 1
+        sub
+        st 2
+        jmp next
+end:
+        ld 1
+        hlt

@@ -7,23 +7,27 @@
 
 #include "interpreter.h"
 
-void saveStep(unsigned int step, unsigned int IP);
-
 int performProgram(FILE *log, VM *vm)
 {
     unsigned int step = 0;
-    pCommand command = getCommandsHead(vm->program->commands);
-    vm->state->IP = 1;
+    vm->state->IP = getCommandsHead(vm->program->commands);
     while (1)
     {
+        pCommand command = vm->state->IP;
         Opcode opcode = getOpcode(command);
         CommandArg arg = getArg(command);
         int x = 0;
         int y = 0;
 
-        saveStep(++step, vm->state->IP);
+        if (command == NULL)
+        {
+            //error
+        }
+        step++;
         fprintf(log, "Command ");
         printCommand(log, command);
+//        fprintf(stdout, "Command ");
+//        printCommand(stdout, command);
 
         // Doesn't use pop stack
 
@@ -33,9 +37,8 @@ int performProgram(FILE *log, VM *vm)
         }
         else if (opcode == JMP)
         {
-            command = arg.jump;
-            vm->state->IP = getCommandID(command);
-            printStateVM(stdout, vm);
+            vm->state->IP = arg.jump;
+            //printStateVM(log, vm);
             continue;
         }
         else if (opcode == LDC)
@@ -53,21 +56,20 @@ int performProgram(FILE *log, VM *vm)
             pushStack(vm->state->stack, getItemMemory(vm->state->memory, arg.address));
         }
         else
-        {
+        {           // needs 1 stack item
             if (!hasItemsStack(vm->state->stack, 1))
             {
                 vm->program->errorVM.errorStep = step;
                 vm->program->errorVM.type = EMPTY_STACK;
-                return -1;
+                return 0;
             }
             y = popStack(vm->state->stack);
             if (opcode == BR)
             {
                 if (y != 0)
                 {
-                    command = arg.jump;
-                    vm->state->IP = getCommandID(command);
-                    printStateVM(stdout, vm);
+                    vm->state->IP = arg.jump;
+                    //printStateVM(log, vm);
                     continue;
                 }
             }
@@ -77,7 +79,7 @@ int performProgram(FILE *log, VM *vm)
                 {
                     vm->program->errorVM.type = OUT_OF_MEMORY;
                     vm->program->errorVM.errorStep = step;
-                    return -2;
+                    return 0;
                 }
                 setItemMemory(vm->state->memory, arg.address, y);
             }
@@ -92,11 +94,12 @@ int performProgram(FILE *log, VM *vm)
             }
             else
             {
+                // needs another 1 stack item
                 if (!hasItemsStack(vm->state->stack, 1))
                 {
                     vm->program->errorVM.errorStep = step;
                     vm->program->errorVM.type = EMPTY_STACK;
-                    return -1;
+                    return 0;
                 }
 
                 x = popStack(vm->state->stack);
@@ -120,10 +123,22 @@ int performProgram(FILE *log, VM *vm)
                 }
                 else if (opcode == DIV)
                 {
+                    if (y == 0)
+                    {
+                        vm->program->errorVM.errorStep = step;
+                        vm->program->errorVM.type = DIVISION_BY_ZERO;
+                        return 0;
+                    }
                     pushStack(vm->state->stack, (int) (x / y));
                 }
                 else if (opcode == MOD)
                 {
+                    if (y == 0)
+                    {
+                        vm->program->errorVM.errorStep = step;
+                        vm->program->errorVM.type = DIVISION_BY_ZERO;
+                        return 0;
+                    }
                     pushStack(vm->state->stack, x % y);
                 }
                 else if (opcode == CMP)
@@ -132,9 +147,8 @@ int performProgram(FILE *log, VM *vm)
                 }
             }
         }
-        printStateVM(log, vm);
-        command = getNextCommand(command);
-        vm->state->IP = getCommandID(command);
+        vm->state->IP = getNextCommand(command);
+        //printStateVM(log, vm);
     }
     fprintf(log, "############## The last state of VM ##############\n");
     printStateVM(log, vm);
@@ -145,9 +159,4 @@ int performProgram(FILE *log, VM *vm)
         return 0;
     }
     return popStack(vm->state->stack);
-}
-
-void saveStep(unsigned int step, unsigned int IP)
-{
-
 }

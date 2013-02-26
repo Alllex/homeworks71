@@ -19,7 +19,7 @@ void runVM(char *fileName, unsigned int sizeOfMemory)
     FILE *code;
     VM *vm;
     int performResult = 0;
-    //FILE *log = fopen("log", "w");
+    FILE *log = fopen("log", "w");
 
     fprintf(stdout, "file name [%s]; memory size [%d]\n", fileName, sizeOfMemory);
     if ((code = fopen(fileName, "r")) == NULL)
@@ -34,11 +34,11 @@ void runVM(char *fileName, unsigned int sizeOfMemory)
     parse(code, vm->program);
     if (vm->program->errorVM.type == NOTHING)
     {
-        //printCommands(stdout, vm->program->commands);
-        performResult = performProgram(stdout, vm);
+        printCommands(stdout, vm->program->commands);
+        performResult = performProgram(log, vm);
         if (vm->program->errorVM.type != NOTHING)
         {
-            printError(stderr, vm->program->errorVM.type, vm->program->errorVM.errorStep, vm->state->IP);
+            printError(stderr, vm->program->errorVM.type, vm->program->errorVM.errorStep, getCommandID(vm->state->IP));
         }
         else
         {
@@ -47,13 +47,13 @@ void runVM(char *fileName, unsigned int sizeOfMemory)
     }
     else
     {
-        printError(stderr, vm->program->errorVM.type, vm->program->errorVM.errorStep, vm->state->IP);
+        printError(stderr, vm->program->errorVM.type, vm->program->errorVM.errorStep, getCommandID(vm->state->IP));
     }
     clearVM(vm);
     deleteVM(vm);
 
     fclose(code);
-    //fclose(log);
+    fclose(log);
 }
 
 VM *createVM()

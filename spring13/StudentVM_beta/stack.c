@@ -88,12 +88,11 @@ void printStackState(FILE *output, pStack stack)
 {
     Item *item = stack->head;
     fprintf(output, "---------------------\n");
-    fprintf(output, "Stack state:\n");
+    fprintf(output, "Stack state:  size(%d)\n", getSizeStack(stack));
     while (item != NULL)
     {
         fprintf(output, "[%d]\n", item->value);
         item = item->next;
     }
-    fprintf(output, "Amount elements (%d)\n", getSizeStack(stack));
     fprintf(output, "---------------------\n");
 }

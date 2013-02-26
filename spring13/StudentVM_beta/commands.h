@@ -45,6 +45,7 @@ typedef union
 
 pCommands createCommands(void);
 pCommand createCommand(void);
+CommandArg createCommandArg(void);
 void deleteCommands(pCommands commands);
 void pushCommand(pCommands commands, pCommand command);
 void freeCommand(pCommand command);
@@ -52,9 +53,6 @@ void freeCommand(pCommand command);
 pCommand getCommandsHead(pCommands commands);
 void eraseCommand(pCommands commands, pCommand command, pCommand previous);
 void setNextCommand(pCommand command, pCommand next);
-int isLabel(pCommand command);
-void setLabel(pCommand command, char *label);
-char *getLabel(pCommand command);
 pCommand getNextCommand(pCommand command);
 int getCommandID(pCommand command);
 Opcode getOpcode(pCommand command);

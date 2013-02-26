@@ -53,7 +53,7 @@ pCommand readNextCommand(FILE *code)
 {
     pCommand com = createCommand();
     char *command = getString(code);
-    CommandArg arg;
+    CommandArg arg = createCommandArg();
     if (strlen(command) == 0)
     {
         clearString(command);
@@ -62,8 +62,9 @@ pCommand readNextCommand(FILE *code)
     if (command[strlen(command) - 1] == ':')
     {
         command[strlen(command) - 1] = '\0';
-        setLabel(com, command);
         setOpcode(com, LBL);
+        arg.label = command;
+        setCommandArg(com, arg);
         return com;
     }
     strToLower(command);
@@ -162,14 +163,15 @@ void setLabels(Program *program)
     pCommand lbl = getCommandsHead(program->commands);
     while (lbl != NULL)
     {
-        if (isLabel(lbl))
+        if (getOpcode(lbl) == LBL)
         {
             pCommand temp = getCommandsHead(program->commands);
             while (temp != NULL)
             {
+                char *labeldef = getArg(lbl).label;
                 char *label = getArg(temp).label;
                 if ((getOpcode(temp) == JMP || getOpcode(temp) == BR) && (label != NULL)
-                        && strcmp(getLabel(lbl), label) == 0)
+                        && strcmp(labeldef, label) == 0)
                 {
                     CommandArg arg = getArg(temp);
                     free(label);
