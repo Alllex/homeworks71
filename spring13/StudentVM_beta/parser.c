@@ -101,9 +101,7 @@ pCommand readNextCommand(FILE *code)
     else if (strcmp(command, "st") == 0)
     {
         char *num = getString(code);
-        int temp = atoi(num);
         unsigned int address = (unsigned int) atoi(num);
-        printf("temp [%s]\n", num);
         clearString(num);
         setOpcode(com, ST);
         arg.address = address;
@@ -218,7 +216,7 @@ void strToLower(char *s)
 
 int isDivide(char c)
 {
-    return !isalpha(c) && !isdigit(c) && c != ':';
+    return c == ' ' || c == '\t' || c == '\n';
 }
 
 // this function provide reading very long string to \n
@@ -248,6 +246,11 @@ char *getString(FILE *input)
         {
             c = fgetc(input);
         }
+        if (c == ';')
+        {
+            goToNextLine(input);
+            break;
+        }
         if (isDivide(c))
         {
             break;
@@ -259,15 +262,8 @@ char *getString(FILE *input)
         }
         string[countChars++] = c;
     }
-//    if (feof(input))
-//    {
-//        string[countChars - 1] = '\0';
-//    }
-//    else
-//    {
-//        string[countChars] = '\0';
-//    }
     string[countChars] = '\0';
+    printf("Read[%s]\n", string);
     return string;
 }
 
