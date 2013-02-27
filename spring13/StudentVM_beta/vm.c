@@ -19,6 +19,7 @@ void runVM(char *fileName, unsigned int sizeOfMemory)
     FILE *code;
     VM *vm;
     int performResult = 0;
+    int numCommand = 0;
     FILE *log = fopen("log", "w");
 
     fprintf(stdout, "file name [%s]; memory size [%d]\n", fileName, sizeOfMemory);
@@ -31,10 +32,10 @@ void runVM(char *fileName, unsigned int sizeOfMemory)
 
     vm = createVM();
     setStartStateVM(vm, sizeOfMemory);
-    parse(code, vm->program);
+    numCommand = parse(code, vm->program);
+    printCommands(stdout, vm->program->commands);
     if (vm->program->errorVM.type == NOTHING)
     {
-        printCommands(stdout, vm->program->commands);
         performResult = performProgram(log, vm);
         if (vm->program->errorVM.type != NOTHING)
         {
@@ -42,12 +43,12 @@ void runVM(char *fileName, unsigned int sizeOfMemory)
         }
         else
         {
-            fprintf(stdout, "\n\n---------------------\n\nResult of preform: [%d]\n", performResult);
+            fprintf(stdout, "\nResult of preform: [%d]\n", performResult);
         }
     }
     else
     {
-        printError(stderr, vm->program->errorVM.type, vm->program->errorVM.errorStep, getCommandID(vm->state->IP));
+        printError(stderr, vm->program->errorVM.type, 0, numCommand);
     }
     clearVM(vm);
     deleteVM(vm);

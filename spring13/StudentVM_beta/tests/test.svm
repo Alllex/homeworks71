@@ -1,0 +1,5 @@
+        ldc 1
+        ldc 100
+        mod
+        st -7
+        hlt

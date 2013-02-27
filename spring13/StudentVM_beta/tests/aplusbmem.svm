@@ -1,0 +1,8 @@
+        ldc 11
+        ldc 12
+        st 0
+        ST 1
+        ld 1
+        ld 0
+        ADD
+        HLT

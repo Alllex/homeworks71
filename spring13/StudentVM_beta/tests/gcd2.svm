@@ -1,0 +1,15 @@
+        ldc 584
+        ldc 696
+		st 0
+		ld 0
+rec:
+		br next
+		hlt
+next:
+		ld 0
+		mod
+		ld 0
+		swp
+        st 0
+        ld 0
+		jmp rec

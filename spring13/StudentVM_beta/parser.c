@@ -10,7 +10,7 @@
 #include <string.h>
 #include <ctype.h>
 
-void setCommands(FILE *code, Program *program);
+int setCommands(FILE *code, Program *program);
 void setLabels(Program *program);
 pCommand readNextCommand(FILE *code);
 
@@ -21,20 +21,27 @@ void strToLower(char *s);
 
 int parse(FILE *code, Program *program)
 {
-    setCommands(code, program);
+    int numCommands = setCommands(code, program);
     if (program->errorVM.type != NOTHING)
     {
-        return 1;
+        return numCommands;
+    }
+    if (!hasHLT(program->commands))
+    {
+        program->errorVM.type = NO_HLT;
+        return numCommands;
     }
     setLabels(program);
     return 0;
 }
 
-void setCommands(FILE *code, Program *program)
+int setCommands(FILE *code, Program *program)
 {
+    int numCommand = 0;
     while (!feof(code))
     {
         pCommand command = readNextCommand(code);
+        numCommand++;
         if (command == NULL)
         {
             continue;
@@ -43,10 +50,15 @@ void setCommands(FILE *code, Program *program)
         {
             program->errorVM.type = INCORRECT_COMMAND;
             freeCommand(command);
-            return;
+            return numCommand;
+        }
+        if (getOpcode(command) == HLT)
+        {
+            setHasHLT(program->commands, 1);
         }
         pushCommand(program->commands, command);
     }
+    return 0;
 }
 
 pCommand readNextCommand(FILE *code)
@@ -89,7 +101,9 @@ pCommand readNextCommand(FILE *code)
     else if (strcmp(command, "st") == 0)
     {
         char *num = getString(code);
+        int temp = atoi(num);
         unsigned int address = (unsigned int) atoi(num);
+        printf("temp [%s]\n", num);
         clearString(num);
         setOpcode(com, ST);
         arg.address = address;

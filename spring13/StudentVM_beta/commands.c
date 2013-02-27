@@ -21,6 +21,7 @@ typedef struct Commands
     pCommand head;
     pCommand tail;
     int amountCommands;
+    int hasHLT;
 } Commands;
 
 void deleteContains(pCommands commands);
@@ -33,6 +34,7 @@ pCommands createCommands(void)
     commands->head = NULL;
     commands->tail = NULL;
     commands->amountCommands = 0;
+    commands->hasHLT = 0;
     return commands;
 }
 
@@ -209,4 +211,14 @@ void printCommand(FILE *output, pCommand command)
     case ERR: fprintf(output, "ERROR\n"); break;
     default:  fprintf(output, "ERROR\n"); break;
     }
+}
+
+void setHasHLT(pCommands commands, int has)
+{
+    commands->hasHLT = has;
+}
+
+int hasHLT(pCommands commands)
+{
+    return commands->hasHLT;
 }

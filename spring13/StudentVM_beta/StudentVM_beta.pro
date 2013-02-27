@@ -35,5 +35,15 @@ OTHER_FILES += \
     pr/aplusbmem.svm \
     pr/AaddBsqr.svm \
     pr/fib.svm \
-    pr/prime.svm
+    pr/prime.svm \
+    tests/testSWP.svm \
+    tests/test.svm \
+    tests/sumToX.svm \
+    tests/loop.svm \
+    tests/lcm.svm \
+    tests/isPrime.svm \
+    tests/gcd2.svm \
+    tests/aplusbstack.svm \
+    tests/aplusbmem.svm \
+    tests/AaddBsqr.svm
 
