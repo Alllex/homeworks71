@@ -1,18 +1,6 @@
-
-
-
-
-        ldc -223
-        ldc   1000
-        add                                                       ;;oi4tynp98436yvq32y5pbq8pq4t8yvq4bt08q4[wtv  2948ytv     4wopty comment
-
-
-
-
-
-        ldc 8
-
-        st 2;SUpERCOmment!!!kgasdl;gkjasdpgohasdgoihasdpghwqgeoihpoihpwgh
+        ldc 5
+        ldc 1
+        sti
+        ldc 1
+        ldi
         hlt
-
-

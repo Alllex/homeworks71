@@ -107,6 +107,14 @@ pCommand readNextCommand(FILE *code)
         arg.address = address;
         setCommandArg(com, arg);
     }
+    else if (strcmp(command, "sti") == 0)
+    {
+        setOpcode(com, STI);
+    }
+    else if (strcmp(command, "ldi") == 0)
+    {
+        setOpcode(com, LDI);
+    }
     else if (strcmp(command, "swp") == 0)
     {
         setOpcode(com, SWP);
@@ -263,7 +271,7 @@ char *getString(FILE *input)
         string[countChars++] = c;
     }
     string[countChars] = '\0';
-    printf("Read[%s]\n", string);
+    //printf("Read[%s]\n", string);
     return string;
 }
 

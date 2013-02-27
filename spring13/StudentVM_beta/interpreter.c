@@ -83,6 +83,17 @@ int performProgram(FILE *log, VM *vm)
                 }
                 setItemMemory(vm->state->memory, arg.address, y);
             }
+            else if (opcode == LDI)
+            {
+                unsigned int address = (unsigned int) y;
+                if (!isValidAddress(vm->state->memory, address))
+                {
+                    vm->program->errorVM.type = OUT_OF_MEMORY;
+                    vm->program->errorVM.errorStep = step;
+                    return 0;
+                }
+                pushStack(vm->state->stack, getItemMemory(vm->state->memory, address));
+            }
             else if (opcode == DUP)
             {
                 pushStack(vm->state->stack, y);
@@ -108,6 +119,17 @@ int performProgram(FILE *log, VM *vm)
                 {
                     pushStack(vm->state->stack, y);
                     pushStack(vm->state->stack, x);
+                }
+                else if (opcode == STI)
+                {
+                    unsigned int address = (unsigned int) y;
+                    if (!isValidAddress(vm->state->memory, address))
+                    {
+                        vm->program->errorVM.type = OUT_OF_MEMORY;
+                        vm->program->errorVM.errorStep = step;
+                        return 0;
+                    }
+                    setItemMemory(vm->state->memory, address, x);
                 }
                 else if (opcode == ADD)
                 {

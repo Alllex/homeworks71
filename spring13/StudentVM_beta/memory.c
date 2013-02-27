@@ -47,7 +47,7 @@ int getItemMemory(pMemory memory, unsigned int address)
 
 void setItemMemory(pMemory memory, unsigned int address, int value)
 {
-    if (address <= memory->size)
+    if (address < memory->size)
     {
         memory->cell[(address) / PAGE_MEMORY_SIZE][(address) % PAGE_MEMORY_SIZE] = value;
     }

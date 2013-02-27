@@ -195,6 +195,8 @@ void printCommand(FILE *output, pCommand command)
     case LDC: fprintf(output, "\t\t[LDC] (%d)\n", command->arg.number); break;
     case LD:  fprintf(output, "\t\t[LD]  (%d)\n", command->arg.address); break;
     case ST:  fprintf(output, "\t\t[ST]  (%d)\n", command->arg.address); break;
+    case STI: fprintf(output, "\t\t[STI]\n"); break;
+    case LDI: fprintf(output, "\t\t[LDI]\n"); break;
     case SWP: fprintf(output, "\t\t[SWP]\n"); break;
     case DUP: fprintf(output, "\t\t[DUP]\n"); break;
     case POP: fprintf(output, "\t\t[POP]\n"); break;

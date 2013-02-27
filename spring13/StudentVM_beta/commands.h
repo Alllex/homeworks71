@@ -16,6 +16,8 @@ typedef enum
     LDC, // load const to stack
     LD,  // load to stack from address
     ST,  // store from stack to address
+    STI, // get address from stack and store value to address cell of memory
+    LDI, // get address from stack and load value from address cell of memory
     SWP, // exchange places of two stack's elements
     DUP, // double push top of stack
     POP,
