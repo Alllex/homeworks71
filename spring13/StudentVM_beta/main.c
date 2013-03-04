@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include "vm.h"
 
@@ -18,6 +19,8 @@ int main(int argc, char **argv)
     int i = 0;
     char *param;
     char *fileName;
+    time_t timeStart = time(NULL);
+    time_t timeEnd = timeStart;
 
 //    test();
 //    return 0;
@@ -38,6 +41,8 @@ int main(int argc, char **argv)
         }
     }
     runVM(fileName, sizeOfMemory);
+    timeEnd = time(NULL);
+    printf("Time of executing (%0.10gsec)\n", difftime(timeEnd, timeStart));
     return 0;
 }
 

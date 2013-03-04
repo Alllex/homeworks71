@@ -7,7 +7,7 @@
 
 #include "memory.h"
 
-#define PAGE_MEMORY_SIZE 5
+#define PAGE_MEMORY_SIZE 1024
 
 typedef struct Memory
 {
