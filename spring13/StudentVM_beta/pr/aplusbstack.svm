@@ -1,4 +1,0 @@
-        ldc 11
-        ldc 12
-        add
-        hlt
