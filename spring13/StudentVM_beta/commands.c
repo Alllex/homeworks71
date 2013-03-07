@@ -12,6 +12,7 @@ typedef struct Command
     int id;
     Opcode opcode;
     CommandArg arg;
+    char cleared;
 
     pCommand next;
 } Command;
@@ -45,6 +46,7 @@ pCommand createCommand(void)
     command->opcode = ERR;
     command->arg.number = 0;
     command->next = NULL;
+    command->cleared = 0;
     return command;
 }
 
@@ -78,8 +80,8 @@ void freeCommand(pCommand command)
 
 void clearCommand(pCommand command)
 {
-    if (command != NULL && ((command->opcode == BR || command->opcode == JMP || command->opcode == LBL)
-                            && (command->arg.label != NULL)))
+    if (command != NULL && (command->opcode == BR || command->opcode == JMP || command->opcode == LBL)
+                            && (!command->cleared))
     {
         free(command->arg.label);
     }
@@ -223,4 +225,9 @@ void setHasHLT(pCommands commands, int has)
 int hasHLT(pCommands commands)
 {
     return commands->hasHLT;
+}
+
+void makeCleared(pCommand command)
+{
+    command->cleared = 1;
 }

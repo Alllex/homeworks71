@@ -195,6 +195,7 @@ void setLabels(Program *program)
                 {
                     CommandArg arg = getArg(temp);
                     free(label);
+                    makeCleared(temp);
                     arg.jump = getNextCommand(lbl);
                     setCommandArg(temp, arg);
                 }
@@ -271,7 +272,6 @@ char *getString(FILE *input)
         string[countChars++] = c;
     }
     string[countChars] = '\0';
-    //printf("Read[%s]\n", string);
     return string;
 }
 

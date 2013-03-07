@@ -22,9 +22,6 @@ int main(int argc, char **argv)
     time_t timeStart = time(NULL);
     time_t timeEnd = timeStart;
 
-//    test();
-//    return 0;
-
     for (i = 0; i < argc; ++i)
     {
         param = argv[i];
@@ -42,7 +39,7 @@ int main(int argc, char **argv)
     }
     runVM(fileName, sizeOfMemory);
     timeEnd = time(NULL);
-    printf("Time of executing (%0.10gsec)\n", difftime(timeEnd, timeStart));
+    printf("Time of executing (%0.10g sec)\n", difftime(timeEnd, timeStart));
     return 0;
 }
 

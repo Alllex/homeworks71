@@ -45,5 +45,6 @@ OTHER_FILES += \
     tests/gcd2.svm \
     tests/aplusbstack.svm \
     tests/aplusbmem.svm \
-    tests/AaddBsqr.svm
+    tests/AaddBsqr.svm \
+    pr/gpd.svm
 

@@ -22,7 +22,7 @@ void runVM(char *fileName, unsigned int sizeOfMemory)
     int numCommand = 0;
     FILE *log = fopen("log", "w");
 
-    fprintf(stdout, "file name [%s]; memory size [%d]\n", fileName, sizeOfMemory);
+    //fprintf(stdout, "file name [%s]; memory size [%d]\n", fileName, sizeOfMemory);
     if ((code = fopen(fileName, "r")) == NULL)
     {
         printError(stderr, FILE_NOT_FOUND, 0, 0);

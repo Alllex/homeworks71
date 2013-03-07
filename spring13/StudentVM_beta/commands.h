@@ -63,6 +63,7 @@ void setOpcode(pCommand command, Opcode opcode);
 void setCommandArg(pCommand command, CommandArg arg);
 void setHasHLT(pCommands commands, int has);
 int hasHLT(pCommands commands);
+void makeCleared(pCommand command);
 
 void printCommands(FILE *output, pCommands commands);
 void printCommand(FILE *output, pCommand command);

@@ -1,6 +1,6 @@
-        ldc 10001
-        st  0
-        ldc 1
+        ldc 500; load n
+        st  0;      save in 0
+        ldc 1;      load current prime
         st  1
         ldc 0
         st  2

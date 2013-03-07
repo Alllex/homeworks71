@@ -38,7 +38,7 @@ int performProgram(FILE *log, VM *vm)
         else if (opcode == JMP)
         {
             vm->state->IP = arg.jump;
-            //printStateVM(log, vm);
+            printStateVM(log, vm);
             continue;
         }
         else if (opcode == LDC)
@@ -69,7 +69,7 @@ int performProgram(FILE *log, VM *vm)
                 if (y != 0)
                 {
                     vm->state->IP = arg.jump;
-                    //printStateVM(log, vm);
+                    printStateVM(log, vm);
                     continue;
                 }
             }
@@ -170,7 +170,7 @@ int performProgram(FILE *log, VM *vm)
             }
         }
         vm->state->IP = getNextCommand(command);
-        //printStateVM(log, vm);
+        printStateVM(log, vm);
     }
     fprintf(log, "############## The last state of VM ##############\n");
     printStateVM(log, vm);
