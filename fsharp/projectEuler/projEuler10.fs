@@ -8,10 +8,11 @@
 let isPrime (n:int) =
   n = 2 ||
     not (Seq.exists ((=) 0) 
-                    (Seq.append [n % 2] (seq {
+                    (seq {
+                      yield n % 2
                       for i in 3 .. 2 .. ((int (sqrt (floor (float n))) + 1)) do
                           yield n % i 
-                    }))
+                    })
         )
         
 let primes = List.filter isPrime [2..2 * 1000000]
