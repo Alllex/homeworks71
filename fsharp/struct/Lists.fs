@@ -26,10 +26,7 @@ let rec find pr =
     | head::tail -> if pr head then Some head
                                else find pr tail
 
-let rec map op =
-    function
-    | [] -> []
-    | head::tail -> (op head)::(map op tail)
+let rec map op list = List.foldBack (fun x acc -> (op x)::acc) list []
 
 let test = (push 5 [1..4]) = [1..5]
            && (append [1..2] [3..5]) = [1..5]
