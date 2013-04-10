@@ -15,10 +15,12 @@ let rec append l1 l2 =
     | [] -> l2
     | head::tail -> head::(append tail l2)
 
-let rec reverse = 
-    function
-    | [] -> []
-    | head::tail -> push head (reverse tail)
+let reverse list = 
+    let rec rev res rest =
+        match rest with
+        | [] -> res
+        | h::t -> rev (h::res) t
+    rev [] list
     
 let rec find pr =
     function
