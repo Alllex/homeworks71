@@ -5,14 +5,14 @@
     Time:  05.2013
 *)
 
-let private div = 1000000
-
 type BigNum =
 
     val private sign : bool
     val private number : int list
     val private str : string
     val private length : int
+    
+    static member private div() = 1000000
     
     new (s : string) = 
       let signNum = if s.StartsWith("-") then BigNum.getNegativeSign() else BigNum.getPositiveSign()
@@ -43,7 +43,7 @@ type BigNum =
                else strtoint (i + 1) (n * 10 + digit)
         strtoint 0 0
         
-      let len = div.ToString().Length - 1
+      let len = (BigNum.div()).ToString().Length - 1
       let cut = s.Length % len
       let part = s.Substring(0, cut)
       let start = if part = "" then [] else [strtoint part]
@@ -60,7 +60,7 @@ type BigNum =
           else zeros (i + 1) ("0" + s)
         zeros 0 ""
       
-      let len = div.ToString().Length - 1
+      let len = (BigNum.div()).ToString().Length - 1
        
       let rec reparse s = 
         function
@@ -79,7 +79,7 @@ type BigNum =
         else
           match a with
           | [] -> if carry > 0 then [carry] else []
-          | hd::tl -> ((hd + carry) % div)::(add tl ((hd + carry) / div))
+          | hd::tl -> ((hd + carry) % (BigNum.div()))::(add tl ((hd + carry) / (BigNum.div())))
       add list n
       
     static member private add(a, b) = 
@@ -87,7 +87,8 @@ type BigNum =
         match (a, b) with
         | ([], b) -> BigNum.addDigit(b, carry)
         | (a, []) -> BigNum.addDigit(a, carry)
-        | (hdA::tlA, hdB::tlB) -> ((hdA + hdB + carry) % div)::(add tlA tlB ((hdA + hdB + carry) / div))
+        | (hdA::tlA, hdB::tlB) -> 
+          ((hdA + hdB + carry) % (BigNum.div()))::(add tlA tlB ((hdA + hdB + carry) / (BigNum.div())))
       add a b 0
       
     static member private subDigit(list, n) =
@@ -97,7 +98,7 @@ type BigNum =
         | hd::[] -> if hd = carry then [] else [hd - carry]
         | hd::tl ->
            let diff = hd - carry
-           if (diff < 0) then (diff + div)::(sub tl 1)
+           if (diff < 0) then (diff + (BigNum.div()))::(sub tl 1)
            else (diff)::tl
       sub list n
       
@@ -108,7 +109,7 @@ type BigNum =
         | (a, []) -> BigNum.subDigit(a, carry)
         | (hdA::tlA, hdB::tlB) -> 
           let diff = hdA - hdB - carry
-          let current = if diff < 0 then diff + div else diff
+          let current = if diff < 0 then diff + (BigNum.div()) else diff
           let next = if diff < 0 then (sub tlA tlB 1)
                      else (sub tlA tlB 0)
           current::(if next = 0::[] then [] else next)
@@ -149,7 +150,7 @@ type BigNum =
         | [] -> if carry > 0 then [carry] else []
         | hd::tl -> 
           let t = hd * n + carry
-          (t % div)::(mult tl (t / div))
+          (t % (BigNum.div()))::(mult tl (t / (BigNum.div())))
       mult list 0
     
     static member private mult(a : int list, b : int list) =
@@ -161,9 +162,9 @@ type BigNum =
           match (carry, temp) with
           | (hdC::tlC, hdT::tlT) ->
             let hd = hdT + hdC
-            (hd % div)::(mult tlB (BigNum.add(tlC, BigNum.addDigit(tlT, hd / div))))
+            (hd % (BigNum.div()))::(mult tlB (BigNum.add(tlC, BigNum.addDigit(tlT, hd / (BigNum.div())))))
           | ([], hdT::tlT) ->
-            (hdT % div)::(mult tlB (BigNum.addDigit(tlT, hdT / div)))
+            (hdT % (BigNum.div()))::(mult tlB (BigNum.addDigit(tlT, hdT / (BigNum.div()))))
           | (_, _) -> []
           
       mult b []
@@ -208,6 +209,16 @@ type BigNum =
     member a.mult(n : int) = BigNum.mult(a, n)
     member a.mult(b : BigNum) = BigNum.mult(a, b)
     
+    override a.GetHashCode() = a.str.GetHashCode()
+    override a.Equals(b) = a.equal(new BigNum(b.ToString()))
+    
+    interface System.IComparable with
+      member a.CompareTo(o) =
+        let b = new BigNum(o.ToString())
+        if a.less(b) then -1
+        else if a.equal(b) then 0
+             else 1
+    
     static member op_LessThan (a : BigNum, b : BigNum) = a.less(b)
     static member op_LessThan (a : BigNum, n) = a.less(new BigNum(n.ToString()))
     static member op_LessThan (n, a : BigNum) = (new BigNum(n.ToString())).less(a)
@@ -215,8 +226,17 @@ type BigNum =
     static member op_GreaterThan (a : BigNum, n) = a.greater(new BigNum(n.ToString()))
     static member op_GreaterThan (n, a : BigNum) = (new BigNum(n.ToString())).greater(a)
     static member op_Equality (a : BigNum, b : BigNum) = a.equal(b)
-    static member op_Equality (a : BigNum, n) = a.equal(new BigNum(n.ToString()))
-    static member op_Equality (n, a : BigNum) = (new BigNum(n.ToString())).equal(a)
+    static member op_Equality (a : BigNum, n) = (a = (new BigNum(n.ToString())))
+    static member op_Equality (n, a : BigNum) = (a = (new BigNum(n.ToString())))
+    static member op_Inequality (a : BigNum, b : BigNum) = not (a.equal(b))
+    static member op_Inequality (a : BigNum, n) = not (a = (new BigNum(n.ToString())))
+    static member op_Inequality (n, a : BigNum) = not (a = (new BigNum(n.ToString())))
+    static member op_LessThanOrEqual (a : BigNum, b : BigNum) = a.less(b) || a.equal(b)
+    static member op_LessThanOrEqual (a : BigNum, n) = (a <= (new BigNum(n.ToString())))
+    static member op_LessThanOrEqual (n, a : BigNum) = (a <= (new BigNum(n.ToString())))
+    static member op_GreaterThanOrEqual (a : BigNum, b : BigNum) = a.greater(b) || a.equal(b)
+    static member op_GreaterThanOrEqual (a : BigNum, n) = (a >= (new BigNum(n.ToString())))
+    static member op_GreaterThanOrEqual (n, a : BigNum) = (a >= (new BigNum(n.ToString())))
     
     static member (~-) (a : BigNum) = BigNum.invert(a)
     static member (+) (a : BigNum, b : BigNum) = a.add(b)
@@ -229,6 +249,7 @@ type BigNum =
     static member ( *) (a : BigNum, n) = a.mult(new BigNum(n.ToString()))
     static member ( *) (n, a : BigNum) = a * (n.ToString())
     static member ( **) (a : BigNum, n : int) = a.power(n)
+    static member Hat (a : BigNum, n : int) = a.power(n)
     
     static member factorial(n) =
       let rec factorial (a : BigNum) n =
@@ -245,7 +266,8 @@ type BigNum =
     override this.ToString() = (if this.isNegative() then "-" else "") + this.str
     member this.print = printf "%s" (this.ToString())
     member this.dividedBySpaces() = (if this.isNegative() then "-" else "") + BigNum.divideBySpaces(this.str)
-//---------------------------------------------------------------------------------------------------------------------    
+    
+//---------------------------------------------------------------------------------------------------------------------        
     
 let rand = new System.Random()
 
@@ -253,28 +275,28 @@ let testOperations x y =
     let a = new BigNum(x.ToString())
     let b = new BigNum(y.ToString())
     printf "(%s) < (%s) = (" (x.ToString()) (y.ToString())
-    printf "%b" (a.less(b))
-    printfn ") %s" (if (x < y) = a.less(b) then "" else "FAIL")
+    printf " %b" (a < b)
+    printfn ") %s" (if (x < y) = (a < b) then "" else "FAIL")
     
     printf "(%s) > (%s) = (" (x.ToString()) (y.ToString())
-    printf "%b" (a.greater(b))
-    printfn ") %s" (if (x > y) = a.greater(b) then "" else "FAIL")
+    printf " %b" (a > b)
+    printfn ") %s" (if (x > y) = (a > b) then "" else "FAIL")
     
     printf "(%s) == (%s) = (" (x.ToString()) (y.ToString()) 
-    printf "%b" (a.equal(b))
-    printfn ") %s" (if (x = y) = a.equal(b) then "" else "FAIL")
+    printf " %b" (a = b)
+    printfn ") %s" (if (x = y) = (a = b) then "" else "FAIL")
     
     printf "(%s) + (%s) = (" (x.ToString()) (y.ToString())
-    (a.add(b)).print
-    printfn ") %s" (if (x + y).ToString() = (a.add(b)).ToString() then "" else "FAIL")
+    (a + b).print
+    printfn ") %s" (if (x + y).ToString() = (a + b).ToString() then "" else "FAIL")
     
     printf "(%s) - (%s) = (" (x.ToString()) (y.ToString())
-    (a.sub(b)).print
-    printfn ") %s" (if (x - y).ToString() = (a.sub(b)).ToString() then "" else "FAIL")
+    (a - b).print
+    printfn ") %s" (if (x - y).ToString() = (a - b).ToString() then "" else "FAIL")
     
     printf "(%s) * (%s) = (" (x.ToString()) (y.ToString())
-    (a.mult(b)).print
-    printfn ") %s" (if (x * y).ToString() = (a.mult(b)).ToString() then "" else "FAIL")
+    (a * b).print
+    printfn ") %s" (if (x * y).ToString() = (a * b).ToString() then "" else "FAIL")
     printfn "------------------------------\n"
     
 printfn "Some tests:"
@@ -288,9 +310,12 @@ for i in 1..amountTests do
     let y = rand.Next(2 * maxDiff) - maxDiff
     let a = new BigNum(x.ToString())
     let b = new BigNum(y.ToString())
-    let test = (x < y) = (a.less(b))
-               && (x > y) = (a.greater(b))
-               && (x = y) = (a.equal(b))
+    let test = (x < y) = (a < b)
+               && (x > y) = (a > b)
+               && (x = y) = (a = b)
+               && (x <> y) = (a <> b)
+               && (x <= y) = (a <= b)
+               && (x >= y) = (a >= b)
                && (x + y).ToString() = (a + b).ToString() 
                && (x - y).ToString() = (a - b).ToString()
                && (x * y).ToString() = (a * b).ToString()
@@ -300,8 +325,9 @@ for i in 1..amountTests do
 printfn "tests(%i/%i) = %i%%"  count amountTests (count * 100 / amountTests)
 
 let two = new BigNum(2)
-printf "\n%s^%i = " (two.ToString()) 5000
-(two.power(5000)).print
+let power = 5000
+printf "\n%s^%i = " (two.ToString()) power
+(two.power(power)).print
 printfn "\n"
   
 let num = 1000
