@@ -117,32 +117,21 @@ type BigNum =
       
     static member private isZero(a : BigNum) = (a.str = "0")
       
-    static member lessAbs(a : BigNum, b : BigNum) = 
-      if a.length <> b.length then a.length < b.length
-      else let rec less i = 
-             if i = a.str.Length then false
-             else if a.str.[i] = b.str.[i] then less (i + 1) else a.str.[i] < b.str.[i]
-           less 0
-        
-    static member private equal(a : BigNum, b : BigNum) = 
-      if a.sign <> b.sign || a.length <> b.length then false
-      else let rec equal a b =
-             match (a, b) with
-                  | ([], []) -> true
-                  | (hdA::tlA, hdB::tlB) -> if hdA = hdB then equal tlA tlB else false
-                  | (_, _) -> false
-           equal a.number b.number   
+    static member private cmp(a : string, b : string) =
+        if a.Length <> b.Length then if a.Length < b.Length then -1 else 1
+        else let rec less i = 
+                 if i = a.Length then 0
+                 else if a.[i] = b.[i] then less (i + 1) else if int a.[i] < int b.[i] then -1 else 1
+             less 0  
       
     static member private add(a : BigNum, b : BigNum) = 
       if a.sign = b.sign then new BigNum(BigNum.add(a.number, b.number), a.sign)
-      else if BigNum.lessAbs(b, a) then new BigNum(BigNum.sub(a.number, b.number), a.sign)
+      else if BigNum.cmp(b.str, a.str) < 0 then new BigNum(BigNum.sub(a.number, b.number), a.sign)
            else let result = new BigNum(BigNum.sub(b.number, a.number), b.sign)
                 if result.isZero() then BigNum.zero() else result
     
     static member private invert(a : BigNum) = 
-      if not (a.isZero()) 
-       then new BigNum(a.number, not a.sign) 
-       else a
+      if not (a.isZero()) then new BigNum(a.number, not a.sign) else a
       
     static member private mult(list, n) = 
       let rec mult a carry = 
@@ -168,13 +157,7 @@ type BigNum =
           | (_, _) -> []
           
       mult b []
-         
-    static member private less(a : BigNum, b : BigNum) = 
-      if BigNum.equal(a, b) then false
-      else if a.sign = b.sign then (BigNum.lessAbs(a, b) = a.isPositive())
-           else a.isNegative()
-      
-    static member private greater(a : BigNum, b : BigNum) = not (BigNum.less(a, b) || BigNum.equal(a, b))
+        
     static member private sub(a : BigNum, b : BigNum) = BigNum.add(a, BigNum.invert(b))
     static member private abs(a : BigNum) = new BigNum(a.number, BigNum.getPositiveSign())
     static member private mult(a : BigNum, n : int) = 
@@ -187,13 +170,13 @@ type BigNum =
       if a.isZero() || b.isZero() then BigNum.zero()
       else 
         let signProduct = if a.sign = b.sign then BigNum.getPositiveSign() else BigNum.getNegativeSign()
-        new BigNum((if BigNum.less(a, b) then BigNum.mult(b.number, a.number) 
+        new BigNum((if b.length > a.length then BigNum.mult(b.number, a.number) 
                     else BigNum.mult(a.number, b.number)), signProduct)
     
-    static member private divideBySpaces(s : string) = 
+    static member private divideBySpaces(s : string, n : int) = 
       let rec divide i str = 
         if i < 0 then str
-        else if i <> 0 && (s.Length - i) % 3 = 0 then divide (i - 1) (" " + s.[i].ToString() + str)
+        else if i <> 0 && (s.Length - i) % n = 0 then divide (i - 1) (" " + s.[i].ToString() + str)
              else divide (i - 1) (s.[i].ToString() + str)
       divide (s.Length - 1) ""
     
@@ -201,19 +184,13 @@ type BigNum =
     member a.isNegative() = (a.sign = BigNum.getNegativeSign())
     member a.isPositive() = (a.sign = BigNum.getPositiveSign())
     member a.abs() = BigNum.abs(a)
-    member a.less(b : BigNum) = BigNum.less(a, b)
-    member a.greater(b : BigNum) = BigNum.greater(a, b)
-    member a.equal(b : BigNum) = BigNum.equal(a, b)
     member a.add(b : BigNum) = BigNum.add(a, b)
     member a.sub(b : BigNum) = BigNum.sub(a, b)
     member a.mult(n : int) = BigNum.mult(a, n)
     member a.mult(b : BigNum) = BigNum.mult(a, b)
     
     override a.GetHashCode() = a.ToString().GetHashCode()
-    override a.Equals(b) = 
-        match b with
-        | :? BigNum as n -> a.equal(n)
-        | _ -> a.equal(new BigNum(b.ToString()))
+    override a.Equals(b) = a.CompareToObj(b) = 0
     
     interface System.IComparable with
       member a.CompareTo(o) =
@@ -221,9 +198,13 @@ type BigNum =
         | :? BigNum as b -> a.CompareToObj(b)
         | _ -> a.CompareToObj(new BigNum(o.ToString()))
     
+    static member private cmp(a : BigNum, b : BigNum) =
+        if a.sign <> b.sign then if a.sign = BigNum.getPositiveSign() then 1 else -1
+        else if a.isPositive() then BigNum.cmp(a.str, b.str) else BigNum.cmp(b.str, a.str)
+    
     member private a.CompareToObj(b : obj) = 
       match b with
-      | :? BigNum as n -> if a.equal(n) then 0 else if a.less(n) then -1 else 1
+      | :? BigNum as n -> BigNum.cmp(a, n)
       | _ -> a.CompareToObj(new BigNum(b.ToString()))
      
     static member op_LessThan (a : BigNum, b : BigNum) = a.CompareToObj(b) < 0
@@ -270,9 +251,11 @@ type BigNum =
         else power (res.mult(a)) (i + 1)
       power (BigNum.one()) 0
       
-    override this.ToString() = (if this.isNegative() then "-" else "") + this.str
+    member private a.getSign() = (if a.isNegative() then "-" else "")
+      
+    override this.ToString() = this.getSign() + this.str
     member this.print = printf "%s" (this.ToString())
-    member this.dividedBySpaces() = (if this.isNegative() then "-" else "") + BigNum.divideBySpaces(this.str)
+    member this.FormatSeparatedThousands() = this.getSign() + BigNum.divideBySpaces(this.str, 3)
     
 //---------------------------------------------------------------------------------------------------------------------        
     
@@ -334,12 +317,11 @@ printfn "tests(%i/%i) = %i%%"  count amountTests (count * 100 / amountTests)
 let two = new BigNum(2)
 let power = 5000
 printf "\n%s^%i = " (two.ToString()) power
-(two.power(power)).print
+printfn "%s\n" ((two.power(power)).FormatSeparatedThousands())
 printfn "\n"
   
 let num = 1000
 printf "%i! = " num
-(BigNum.factorial(num)).print
-printfn "\n"  
-  
+printfn "%s\n" ((BigNum.factorial(num)).FormatSeparatedThousands())
+
 printfn "\n%A" "happy end (I hope)"
