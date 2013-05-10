@@ -209,34 +209,40 @@ type BigNum =
     member a.mult(n : int) = BigNum.mult(a, n)
     member a.mult(b : BigNum) = BigNum.mult(a, b)
     
-    override a.GetHashCode() = a.str.GetHashCode()
-    override a.Equals(b) = a.equal(new BigNum(b.ToString()))
+    override a.GetHashCode() = a.ToString().GetHashCode()
+    override a.Equals(b) = 
+        match b with
+        | :? BigNum as n -> a.equal(n)
+        | _ -> a.equal(new BigNum(b.ToString()))
     
     interface System.IComparable with
       member a.CompareTo(o) =
-        let b = new BigNum(o.ToString())
-        if a.less(b) then -1
-        else if a.equal(b) then 0
-             else 1
+        match o with
+        | :? BigNum as b -> a.CompareTo(b)
+        | _ -> a.CompareTo(new BigNum(o.ToString()))
     
-    static member op_LessThan (a : BigNum, b : BigNum) = a.less(b)
-    static member op_LessThan (a : BigNum, n) = a.less(new BigNum(n.ToString()))
-    static member op_LessThan (n, a : BigNum) = (new BigNum(n.ToString())).less(a)
-    static member op_GreaterThan (a : BigNum, b : BigNum) = a.greater(b)
-    static member op_GreaterThan (a : BigNum, n) = a.greater(new BigNum(n.ToString()))
-    static member op_GreaterThan (n, a : BigNum) = (new BigNum(n.ToString())).greater(a)
-    static member op_Equality (a : BigNum, b : BigNum) = a.equal(b)
-    static member op_Equality (a : BigNum, n) = (a = (new BigNum(n.ToString())))
-    static member op_Equality (n, a : BigNum) = (a = (new BigNum(n.ToString())))
-    static member op_Inequality (a : BigNum, b : BigNum) = not (a.equal(b))
-    static member op_Inequality (a : BigNum, n) = not (a = (new BigNum(n.ToString())))
-    static member op_Inequality (n, a : BigNum) = not (a = (new BigNum(n.ToString())))
-    static member op_LessThanOrEqual (a : BigNum, b : BigNum) = a.less(b) || a.equal(b)
-    static member op_LessThanOrEqual (a : BigNum, n) = (a <= (new BigNum(n.ToString())))
-    static member op_LessThanOrEqual (n, a : BigNum) = (a <= (new BigNum(n.ToString())))
-    static member op_GreaterThanOrEqual (a : BigNum, b : BigNum) = a.greater(b) || a.equal(b)
-    static member op_GreaterThanOrEqual (a : BigNum, n) = (a >= (new BigNum(n.ToString())))
-    static member op_GreaterThanOrEqual (n, a : BigNum) = (a >= (new BigNum(n.ToString())))
+    member private a.CompareTo(b : BigNum) = if a.equal(b) then 0 
+                                             else if a.less(b) then -1
+                                                               else 1
+     
+    static member op_LessThan (a : BigNum, b : BigNum) = a.CompareTo(b) < 0
+    static member op_LessThan (a : BigNum, n) = a.CompareTo(new BigNum(n.ToString())) < 0
+    static member op_LessThan (n, a : BigNum) = a.CompareTo(new BigNum(n.ToString())) > 0
+    static member op_GreaterThan (a : BigNum, b : BigNum) = a.CompareTo(b) > 0
+    static member op_GreaterThan (a : BigNum, n) = a.CompareTo(new BigNum(n.ToString())) > 0
+    static member op_GreaterThan (n, a : BigNum) = a.CompareTo(new BigNum(n.ToString())) < 0
+    static member op_Equality (a : BigNum, b : BigNum) = a.CompareTo(b) = 0
+    static member op_Equality (a : BigNum, n) = a.CompareTo(new BigNum(n.ToString())) = 0
+    static member op_Equality (n, a : BigNum) = a.CompareTo(new BigNum(n.ToString())) = 0
+    static member op_Inequality (a : BigNum, b : BigNum) = a.CompareTo(b) <> 0
+    static member op_Inequality (a : BigNum, n) = a.CompareTo(new BigNum(n.ToString())) <> 0
+    static member op_Inequality (n, a : BigNum) = a.CompareTo(new BigNum(n.ToString())) <> 0
+    static member op_LessThanOrEqual (a : BigNum, b : BigNum) = a.CompareTo(b) <= 0
+    static member op_LessThanOrEqual (a : BigNum, n) = a.CompareTo(new BigNum(n.ToString())) <= 0
+    static member op_LessThanOrEqual (n, a : BigNum) = a.CompareTo(new BigNum(n.ToString())) >= 0
+    static member op_GreaterThanOrEqual (a : BigNum, b : BigNum) = a.CompareTo(b) >= 0
+    static member op_GreaterThanOrEqual (a : BigNum, n) = a.CompareTo(new BigNum(n.ToString())) >= 0
+    static member op_GreaterThanOrEqual (n, a : BigNum) = a.CompareTo(new BigNum(n.ToString())) <= 0
     
     static member (~-) (a : BigNum) = BigNum.invert(a)
     static member (+) (a : BigNum, b : BigNum) = a.add(b)
