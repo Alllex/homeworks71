@@ -1,6 +1,0 @@
-                ldc 7
-                ldc 12
-                add
-                dup
-                mul
-                hlt
