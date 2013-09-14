@@ -1,0 +1,6 @@
+        ldc 5
+        ldc 1
+        sti
+        ldc 1
+        ldi
+        hlt

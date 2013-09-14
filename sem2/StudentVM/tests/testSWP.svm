@@ -1,0 +1,4 @@
+        ldc 17
+        ldc 23
+        swp
+        hlt

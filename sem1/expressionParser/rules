@@ -1,0 +1,31 @@
+state 0 start jump 1
+
+state 1 switch 1
+        case digit jump 2
+
+state 2 switch 4
+        case digit jump 2
+        case dot   jump 3
+        case exp   jump 5
+        case exit  jump 8
+
+state 3 switch 1
+        case digit jump 4
+
+state 4 switch 3
+        case digit jump 4
+        case exp   jump 5
+        case exit  jump 8
+
+state 5 switch 2
+        case digit jump 7
+        case sign  jump 6
+
+state 6 switch 1
+        case digit jump 7
+
+state 7 switch 2
+        case digit jump 7
+        case exit  jump 8
+
+state 8 finish
