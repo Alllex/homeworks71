@@ -36,7 +36,7 @@ showFraction fr@(p, q) =
     where show' = if isInt fr then show p 
                   else show p ++ "/" ++ show q
 
-testShowFraction = map showFraction $ map reduce $ [(p,q) | p <- [-10..10], q <- [1..10]]
+testShowFraction = map showFraction.reduce $ [(p,q) | p <- [-10..10], q <- [1..10]]
 
 -----------------------------------------------------------
 -- polynoms
@@ -104,3 +104,8 @@ testDivide p1 p2 = let sp = showPolynom in
 
 gcdPolynom p [] = p
 gcdPolynom p1 p2 = gcdPolynom p2 $ modPolynom p1 p2
+
+p1 = [(fr (-1),2),(fr 3,1),(fr 1,0)]
+p2 = [(fr 1,2),(fr 2,1),(fr 1,0)] 
+
+test1 = showPolynom $ gcdPolynom p1 p2
