@@ -31,6 +31,4 @@ isReflexive r = foldr (\x acc -> if (elem (x,x) r) && elem (-x,-x) r then acc el
 closure r = if cl == [] then r else closure $ r ++ cl
     where cl = normilize [(x,z) | a@(x,y1) <- r, b@(y2,z) <- r, y1 == y2, a /= b, not $ elem (x,z) r]
 
-
-
 isTransitive r = foldr (&&) True [elem (x,z) r | a@(x,y1) <- r, b@(y2,z) <- r, y1 == y2, a /= b]
