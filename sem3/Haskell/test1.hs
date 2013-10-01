@@ -5,9 +5,8 @@
 -}
 
 
-zipWith' _ [] _ = []
-zipWith' _ _ [] = []
 zipWith' f (x:xs) (y:ys) = f x y : zipWith' f xs ys
+zipWith' _ _ _ = []
 
 sprod x y = sum $ zipWith' (*) x y
 
@@ -25,7 +24,6 @@ isFunction (r:rs) = (length [1 | (x,_) <- rs, (fst r) == x]) == 0 && isFunction 
 
 isSymmetric r = foldr (&&) True $ map (\(x,y) -> elem (y,x) r) r
 
--- foldl cannot work with infinite lists that is why FOLDR
 isReflexive r = foldr (\x acc -> if (elem (x,x) r) && elem (-x,-x) r then acc else False) True [0,1..]
 
 closure r = if cl == [] then r else closure $ r ++ cl
