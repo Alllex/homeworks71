@@ -61,12 +61,20 @@ find t@(T l x r) a
     | x > a = find l a
     | otherwise = find r a
 
+-- make leaf
+lf :: Integer -> Tree Integer
+lf x = T E x E
+
 isTree :: Tree Integer -> Bool
-isTree E = True
-isTree (T E _ E) = True
-isTree (T E x (T E y E)) = x < y
-isTree (T (T E y E) x E) = x > y
-isTree (T l@(T _ y _) x r@(T _ z _)) = y < x && x < z && isTree l && isTree r
+isTree t = isT t Nothing Nothing 
+    where isT E _ _ = True
+          isT (T l x r) min' max' = 
+            x !> min' && x <! max' && isT l min' (Just x) && isT r (Just x) max'
+            where x !> Nothing = True
+                  x !> (Just y) = x > y
+                  x <! Nothing = True
+                  x <! (Just y) = x < y
+             
 
 elements :: Tree Integer -> [Integer]
 elements E = []
