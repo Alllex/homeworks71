@@ -4,9 +4,9 @@ open FsUnit
 
 let letter = "a-zA-Z"
 let digits = "0-9"
-let specials = "\-!#$%^&\*\(\)/"
+let specials = "_\-!#$%^&\*\(\)/"
 let all = letter + digits + specials
-let fstChar = "[" + letter + digits + "]"
+let fstChar = "[_" + letter + "]"
 
 let name = fstChar + "[" + all + "]{0,30}"
 let fullName = "^" + name + "[.]?" + name + "@"
