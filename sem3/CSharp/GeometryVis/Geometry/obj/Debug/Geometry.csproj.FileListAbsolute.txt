@@ -1,8 +1,0 @@
-M:\projects\homeworks71\sem3\CSharp\GeometryVis\Geometry\bin\Debug\Geometry.dll.config
-M:\projects\homeworks71\sem3\CSharp\GeometryVis\Geometry\bin\Debug\Geometry.dll
-M:\projects\homeworks71\sem3\CSharp\GeometryVis\Geometry\bin\Debug\Geometry.pdb
-M:\projects\homeworks71\sem3\CSharp\GeometryVis\Geometry\bin\Debug\Geometry.dll.CodeAnalysisLog.xml
-M:\projects\homeworks71\sem3\CSharp\GeometryVis\Geometry\bin\Debug\Geometry.dll.lastcodeanalysissucceeded
-M:\projects\homeworks71\sem3\CSharp\GeometryVis\Geometry\obj\Debug\Geometry.csprojResolveAssemblyReference.cache
-M:\projects\homeworks71\sem3\CSharp\GeometryVis\Geometry\obj\Debug\Geometry.dll
-M:\projects\homeworks71\sem3\CSharp\GeometryVis\Geometry\obj\Debug\Geometry.pdb
