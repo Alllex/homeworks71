@@ -13,7 +13,7 @@ eval xs x = snd $ head $ filter (\t -> fst t == x) xs
 invert xs = map (\(a,b) -> (b,a)) xs
 
 infixl 9 .*.
-g .*. f = foldr (\(x,y) acc -> let ys = filter (\(y',z) -> y' == y) g in if ys == [] then acc else (x,snd $ head ys):acc) f
+g .*. f = foldr (\(x,y) acc -> let ys = filter (\(y',z) -> y' == y) g in if ys == [] then acc else (x,snd $ head ys):acc) [] f
 
 image ft xs = foldr (\x acc -> let y = filter (\t -> fst t == x) ft in if y == [] then acc else (snd $ head y) : acc) [] xs
 
