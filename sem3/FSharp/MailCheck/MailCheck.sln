@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "MailCheck", "MailCheck\MailCheck.fsproj", "{523E250F-68DC-4D5F-A3BF-C02D3DA88E18}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Tests", "Tests\Tests.fsproj", "{FB777AC4-C742-4DD5-BE1A-826B7547B0FB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{523E250F-68DC-4D5F-A3BF-C02D3DA88E18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{523E250F-68DC-4D5F-A3BF-C02D3DA88E18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{523E250F-68DC-4D5F-A3BF-C02D3DA88E18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{523E250F-68DC-4D5F-A3BF-C02D3DA88E18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB777AC4-C742-4DD5-BE1A-826B7547B0FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB777AC4-C742-4DD5-BE1A-826B7547B0FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB777AC4-C742-4DD5-BE1A-826B7547B0FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB777AC4-C742-4DD5-BE1A-826B7547B0FB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
