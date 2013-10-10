@@ -46,7 +46,7 @@ type PokeBall() =
     inherit PokemonWorldObj()
     let mutable pokemon = None
 
-    member this.HasPokemon = Option.isNone pokemon
+    member this.HasPokemon = pokemon.IsNone
 
     member this.ReleasePokemon() = 
         let p = pokemon
@@ -72,8 +72,8 @@ type Person(name : string) =
         let pokemons = new ResizeArray<PokeBall>()
         member this.TakePokemon(p : Pokemon) = pokemons.Add((new PokeBall()).CatchPokemon(p))
         member this.ShowPokemons() = 
-            printfn "%A" (name + "'s pokemons:")
-            pokemons.ForEach (new System.Action<PokeBall>(fun (pb : PokeBall) -> pb.ToString() |> printfn "%s"))
+            printfn "%s's pokemons:" name
+            pokemons |> Seq.iter (printfn "%A")
     end
 
 
