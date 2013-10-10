@@ -1,21 +1,27 @@
+(*
+    Program: OOP Pokemon World
+    Author: Alex Semin Math-Mech 271 2013
+    2013 (c)
+*)
+
+
+#if INTERACTIVE
+#time "on"
+#endif
 
 type PokemonWorldObj() = inherit obj()
 
 [<AbstractClass>]
-type Pokemon(name, hp, attack, defence) = 
+type Pokemon(name : string, hp : int, attack : int, defence : int) = 
   class
     inherit  PokemonWorldObj()
-    let name : string = name
-    let mutable hp : int = hp
-    let attack : int = attack
-    let defence : int = defence
-    let mutable xp : int = 0
-    member this.Name with get() = name
-    member this.Info 
-        with get() = "Name: \"" + name + 
-                     "\" :: HP(" + hp.ToString() + 
-                     "), AP(" + attack.ToString() + 
-                     "), DP(" + defence.ToString() + ")"
+    let name = name
+    let mutable hp = hp
+    let attack = attack
+    let defence = defence
+    let mutable xp = 0
+    member this.Name = name
+    member this.Info = sprintf "Name: \"%s\" [ HP(%d), AP(%d), DP(%d) ]" name hp attack defence
     abstract member Hit : unit -> string
     abstract member Defend : unit -> string
   end 
@@ -38,8 +44,9 @@ type Slowpoke() =
 type PokeBall() =
   class
     inherit PokemonWorldObj()
-    let mutable hasPokemon = false
     let mutable pokemon = None
+
+    member this.HasPokemon = Option.isNone pokemon
 
     member this.ReleasePokemon() = 
         let p = pokemon
@@ -54,24 +61,25 @@ type PokeBall() =
         match pokemon with
         | Some p -> p.Info
         | None -> "Empty PokeBall"
+
+    static member ToString(pokeball : PokeBall) = pokeball.ToString() 
   end
 
-type Person(name) =
+type Person(name : string) =
     class
         inherit PokemonWorldObj()
-        let name : string = name
-        let mutable pokemons = []
-        member this.TakePokemon(p : Pokemon) = pokemons <- ((new PokeBall()).CatchPokemon(p))::pokemons
+        let name = name
+        let pokemons = new ResizeArray<PokeBall>()
+        member this.TakePokemon(p : Pokemon) = pokemons.Add((new PokeBall()).CatchPokemon(p))
         member this.ShowPokemons() = 
             printfn "%A" (name + "'s pokemons:")
-            pokemons |> List.iter (printfn "%A")
+            pokemons.ForEach (new System.Action<PokeBall>(fun (pb : PokeBall) -> pb.ToString() |> printfn "%s"))
     end
 
 
 let Ash = new Person("Ash")
 Ash.TakePokemon(new Pickachu())
 Ash.TakePokemon(new Slowpoke())
-
 let Jessy = new Person("Jessy R")
 Jessy.TakePokemon(new Meowth())
 
