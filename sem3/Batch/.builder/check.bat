@@ -16,11 +16,13 @@ goto :succ
 :succ
 
 echo Success build!
-echo %succ_build_msg% >%msg_file%
+set email_extra_subject=%msb_succ_result%
 goto :EOF
 
 :fail
 
 echo Building failed...............................FAIL
-echo %fail_build_head% >%msg_file%
-echo File %file_missed% is missed after building. >>%msg_file%
+set email_extra_subject=%msb_fail_result%
+echo File %file_missed% is missed after building.>%my_log%
+if exist %email_attached_files% echo ,>%email_attached_files% 
+echo %my_log%>>%email_attached_files%

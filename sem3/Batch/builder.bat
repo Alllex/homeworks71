@@ -6,11 +6,11 @@ set conf=.builder
 call %conf%\settings.bat
 call %conf%\cleanup.bat
 
-call %conf%\fetch_repo.bat
-if not "%git_fails%"=="" call %conf%\git_failed.bat & goto :end
+call %conf%\git_clone.bat
+if /I "%git_failed%"=="true" call %conf%\git_failed.bat & goto :end
 
-call %conf%\build_sln.bat
-if not "%msb_fails%"=="" call %conf%\msb_failed.bat & goto :end
+call %conf%\msb_build.bat
+if /I "%msb_failed%"=="true" call %conf%\msb_failed.bat & goto :end
 
 call %conf%\check.bat
 
