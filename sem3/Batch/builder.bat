@@ -1,7 +1,7 @@
 @echo off
 
 set builder_start=TRUE
-set conf=.builderconf
+set conf=.builder
 
 call %conf%\settings.bat
 call %conf%\cleanup.bat
