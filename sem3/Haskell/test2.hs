@@ -4,25 +4,27 @@
     08.10.13
 -}
 
+-- 1
 fromFun f = map (\x -> (x, f x))
-
+-- 2
 dom = map fst
-
-eval xs x = snd $ head $ filter (\t -> fst t == x) xs
-
+-- 3
+eval xs x = snd $ head $ filter ((==x) . fst) xs
+-- 4
 invert = map (\(a,b) -> (b,a))
-
+-- 5
 infixl 9 .*.
-g .*. f = foldr (\(x,y) acc -> let ys = filter (\(y',z) -> y' == y) g in if ys == [] then acc else (x,snd $ head ys):acc) [] f
-
-image ft = foldr (\x acc -> let y = filter (\t -> fst t == x) ft in if y == [] then acc else (snd $ head y) : acc) []
-
-preimage ft = foldr (\y acc -> (map fst $ filter (\t -> snd t == y) ft) ++ acc) []
-
+g .*. f = [(x,z) | (x,y) <- f, (y',z) <- g, y == y']
+-- 6
+image ft xs = norm [y | x' <- xs, (x, y) <- ft, x == x']
+    where norm = foldr (\x acc -> if elem x acc then acc else x:acc) []
+-- 7
+preimage ft = image (invert ft)
+-- 8
 isInjective ft = inj [] ft where 
-    inj acc ((_,y):rest) = if elem y acc then False else inj (y:acc) rest
+    inj acc ((_,y):rest) = (elem y acc) && (inj (y:acc) rest)
     inj _ _ = True
-
+-- 9
 isSurjective ft = length ft == -1
-
+-- 10
 areMutuallyInverse ft ft' = foldr (\(x,y) acc -> (elem (y,x) ft') && acc) True ft
