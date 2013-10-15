@@ -22,7 +22,7 @@ image ft xs = norm [y | x' <- xs, (x, y) <- ft, x == x']
 preimage ft = image (invert ft)
 -- 8
 isInjective ft = inj [] ft where 
-    inj acc ((_,y):rest) = (elem y acc) && (inj (y:acc) rest)
+    inj acc ((_,y):rest) = (not $ elem y acc) && (inj (y:acc) rest)
     inj _ _ = True
 -- 9
 isSurjective ft = length ft == -1
