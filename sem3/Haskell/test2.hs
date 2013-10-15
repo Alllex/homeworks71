@@ -19,8 +19,8 @@ g .*. f = [(x,z) | (x,y) <- f, (y',z) <- g, y == y']
 image ft xs = norm [y | x' <- xs, (x, y) <- ft, x == x']
     where norm = foldr (\x acc -> if elem x acc then acc else x:acc) []
 -- 7
-preimage ft = image (invert ft)
--- 8
+preimage = image . invert
+
 isInjective ft = inj [] ft where 
     inj acc ((_,y):rest) = (not $ elem y acc) && (inj (y:acc) rest)
     inj _ _ = True
