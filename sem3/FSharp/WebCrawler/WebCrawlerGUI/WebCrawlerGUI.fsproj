@@ -5,12 +5,12 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>e30d07e0-09fe-45a4-b489-9e17fd899c24</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>WebCrawler</RootNamespace>
-    <AssemblyName>WebCrawler</AssemblyName>
+    <ProjectGuid>989ea977-8354-4b19-b59b-067a0cb331cc</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>WebCrawlerGUI</RootNamespace>
+    <AssemblyName>WebCrawlerGUI</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <Name>WebCrawler</Name>
+    <Name>WebCrawlerGUI</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,7 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Debug\WebCrawler.XML</DocumentationFile>
+    <DocumentationFile>bin\Debug\WebCrawlerGUI.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -32,7 +32,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <DocumentationFile>bin\Release\WebCrawler.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\WebCrawlerGUI.XML</DocumentationFile>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
@@ -42,11 +42,20 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Program.fs" />
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WebCrawler\WebCrawler.fsproj">
+      <Name>WebCrawler</Name>
+      <Project>{e30d07e0-09fe-45a4-b489-9e17fd899c24}</Project>
+      <Private>True</Private>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
