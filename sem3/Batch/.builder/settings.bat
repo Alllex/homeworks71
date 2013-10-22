@@ -1,6 +1,6 @@
 @echo off
 
-if %builder_start%=="" goto :EOF
+if "%builder_start%"=="" goto :EOF
 
 set repo_name=GeometryVis
 set git_repo_url=https://github.com/Alllex/%repo_name%.git

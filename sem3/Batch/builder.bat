@@ -20,4 +20,3 @@ call %conf%\email.bat
 call %conf%\rm_temp.bat
 
 echo Done.
-pause

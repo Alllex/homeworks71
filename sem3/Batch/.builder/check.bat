@@ -1,6 +1,6 @@
 @echo off
 
-if %builder_start%=="" goto :EOF
+if "%builder_start%"=="" goto :EOF
 
 echo Checking for correct building...
 
