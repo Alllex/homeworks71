@@ -14,38 +14,22 @@ instance Show a => Show (Tree a) where
 
 -----------------------------------------------------------
 
--- height
-fh :: Tree Integer -> Integer
-fh E = 0
-fh (T h _ _ _) = h
-
--- difference between children's height
-diff :: Tree Integer -> Integer
-diff (T _ _ l r) = (fh r) - (fh l)
-
--- fixing of node height
-fixh :: Tree Integer -> Tree Integer
-fixh (T _ k l r) = T (max (fh l) (fh r) + 1) k l r
-
--- simple right and left rotation
-rotateR :: Tree Integer -> Tree Integer
-rotateR (T _ key (T _ lkey ll lr) r) = fixh $ T 0 lkey ll (fixh $ T 0 key lr r)
-rotateL :: Tree Integer -> Tree Integer
-rotateL (T _ key l (T _ rkey rl rr)) = fixh $ T 0 rkey (fixh $ T 0 key l rl) rr
-
--- balancing of a node
-balance :: Tree Integer -> Tree Integer
-balance q = let p@(T h k l r) = fixh q in
-    if diff p > 1 then rotateL $ T h k l (if diff r > 0 then r else rotateR r) else 
-    if diff p < -1 then rotateR $ T h k (if diff l < 0 then l else rotateL l) r else p
-
 insert :: Tree Integer -> Integer -> Tree Integer
 insert E x = T 1 x E E
 insert t@(T h k l r) x
-    | x == k    = t
-    | x < k     = balance $ T h k (insert l x) r
-    | otherwise = balance $ T h k l (insert r x)
-
+    | x > k     = balance $ mk k l (insert r x)
+    | x < k     = balance $ mk k (insert l x) r
+    | otherwise = t
+    where
+        fh E = 0
+        fh (T h _ _ _) = h
+        mk k l r = T (max (fh l) (fh r) + 1) k l r
+        diff (T _ _ l r) = (fh r) - (fh l)
+        rotateR (T _ key (T _ lkey ll lr) r) = mk lkey ll (mk key lr r)
+        rotateL (T _ key l (T _ rkey rl rr)) = mk rkey (mk key l rl) rr
+        balance p@(T h k l r) =
+            if diff p > 1  then rotateL $ mk k l (if diff r > 0 then r else rotateR r) else 
+            if diff p < -1 then rotateR $ mk k (if diff l < 0 then l else rotateL l) r else p
 
 -----------------------------------------------------------
 -- auxiliary functions
@@ -67,3 +51,10 @@ mt :: [Integer] -> Tree Integer
 mt = insertList E
 
 -----------------------------------------------------------
+
+test1 = mt [8,9,4,6,2,1]
+test2 = mt [8,9,4,6,2,3]
+test3 = mt [8,9,4,6,2,5]
+test4 = mt [8,9,4,6,2,7]
+
+
