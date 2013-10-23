@@ -11,6 +11,8 @@ data M a b =    E    | T  Integer   (a,    [b])   (M a b) (M a b)
 
 empty = E
 
+------------------ used in "insert" and "remove" ----------
+
 fh E = 0
 fh (T h _ _ _) = h
 mk p l r = T (max (fh l) (fh r) + 1) p l r
@@ -20,6 +22,8 @@ rotateL (T _ p l (T _ rp rl rr)) = mk rp (mk p l rl) rr
 balance node@(T h p l r) =
     if diff node >  1 then rotateL $ mk p l (if diff r > 0 then r else rotateR r) else 
     if diff node < -1 then rotateR $ mk p (if diff l < 0 then l else rotateL l) r else node
+
+-----------------------------------------------------------
 
 insert E k v = T 1 (k, [v]) E E
 insert t@(T h p@(k, vs) l r) k' v'
