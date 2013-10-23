@@ -45,10 +45,9 @@ remove t@(T h p@(k, vs) l r) k'
         rm (T _ k E r) = (k, r)
         rm (T _ k l r) = let (k', l') = rm l in (k', balance $ mk k l' r)
 
-fold f m acc = foldr (\(k, v) acc' -> f k v acc') acc $ elements m
-    where elements m = elems m [] 
-              where elems (T _ (k, v:_) l r) acc = elems l $ (k, v):elems r acc
-                    elems _ acc = acc
+fold f m acc = foldr (\(k, v) acc' -> f k v acc') acc $ elems m []
+    where elems (T _ (k, v:_) l r) acc = elems l $ (k, v):elems r acc
+          elems _ acc = acc
 
 -----------------------------------------------------------
 
