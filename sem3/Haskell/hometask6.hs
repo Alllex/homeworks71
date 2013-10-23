@@ -1,19 +1,11 @@
-
--- empty, insert, find, remove, fold
-
 {- 
-    Hometask #5
-    Balanced trees
+    Hometask #6
+    Map based on AVL trees
 -}
+
 --                                 (   -pair-   )
 --           -empty-      -height- -key- -values- -left-  -right-
 data M a b =    E    | T  Integer   (a,    [b])   (M a b) (M a b)
-
--- simple way for displaying trees
-instance (Show a, Show b) => Show (M a b) where
-    show E = "E"
-    show (T _ (k, v:_) E E) = "leaf["++(show k)++", "++(show v)++"]"
-    show (T h (k, v:_) l r) = "T(h"++(show h)++" p["++(show k)++", "++(show v)++"] "++(show l)++" "++(show r)++")"
 
 -----------------------------------------------------------
 
