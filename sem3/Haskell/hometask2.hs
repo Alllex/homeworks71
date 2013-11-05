@@ -1,8 +1,12 @@
 {-
-#1. Fibonacci numbers (using pairs)
-#2. Processing functions lists
-#3. Fractional arithmetic
-#4. Polynomial integer arithmetic (include gcd)
+    Hometask #2
+    Author: Alex Semin Math-Mech 271 2013
+    2013 (c)
+
+    #1. Fibonacci numbers (using pairs)
+    #2. Processing functions lists
+    #3. Fractional arithmetic
+    #4. Polynomial integer arithmetic (include gcd)
 -}
 -----------------------------------------------------------
 -- fibonacci numbers

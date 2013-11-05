@@ -1,6 +1,9 @@
-{- 
+{-
     Hometask #6
-    Map based on AVL trees
+    Author: Alex Semin Math-Mech 271 2013
+    2013 (c)
+
+    #1 Map based on AVL trees
 -}
 
 --                                 (   -pair-   )

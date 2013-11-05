@@ -1,3 +1,8 @@
+{-
+    Hometask #1 : gcd, lcm, isCoprime, euler function
+    Author: Alex Semin Math-Mech 271 2013
+    2013 (c)
+-}
 
 gcd' a 0 = a  
 gcd' a b = gcd' b (a `mod` b)

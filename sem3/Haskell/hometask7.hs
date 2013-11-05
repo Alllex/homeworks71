@@ -1,3 +1,11 @@
+{-
+    Hometask #7
+    Author: Alex Semin Math-Mech 271 2013
+    2013 (c)
+
+    #1 C logical expressions parser
+-}
+
 type Parser a = String -> [(a, String)]
 
 empty :: Parser a

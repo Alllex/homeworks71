@@ -1,6 +1,9 @@
-{- 
-  Hometask #4
-  Binary Trees
+{-
+    Hometask #4
+    Author: Alex Semin Math-Mech 271 2013
+    2013 (c)
+
+    #1 Binary Trees
 -}
 
 data Tree a = E | T (Tree a) a (Tree a)

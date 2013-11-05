@@ -1,6 +1,9 @@
-{- 
+{-
     Hometask #5
-    Balanced trees
+    Author: Alex Semin Math-Mech 271 2013
+    2013 (c)
+
+    #1 Balanced trees
 -}
 
 --            -empty-      -height- -key-  -left-  -right-
@@ -13,7 +16,6 @@ instance Show a => Show (Tree a) where
     show (T h k l r) = "T(h"++(show h)++" k["++(show k)++"] "++(show l)++" "++(show r)++")"
 
 -----------------------------------------------------------
-
 
 fh E = 0
 fh (T h _ _ _) = h
@@ -63,24 +65,4 @@ insertList t = foldl (\acc x -> insert acc x) t
 -- make tree
 mt :: [Integer] -> Tree Integer
 mt = insertList E
-
------------------------------------------------------------
-
-test1 = mt [8,9,4,6,2,1]
-test2 = mt [8,9,4,6,2,3]
-test3 = mt [8,9,4,6,2,5]
-test4 = mt [8,9,4,6,2,7]
-
-test5 = mt [3,2,4,1]
-test6 = remove test5 1
-test7 = remove test5 2
-test8 = remove test5 3
-test9 = remove test5 4
-
-test10 = mt [2,1,5,0,4,6,3]
-test11 = remove test10 6
-test12 = remove test10 2
-
-test13 = mt [5,3,9,2,4,7,10,1,8]
-test14 = remove test13 5
 

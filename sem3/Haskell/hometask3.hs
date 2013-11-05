@@ -1,6 +1,10 @@
 {-
-#1. Prime numbers
-#2. Fibonacci numbers
+    Hometask #3
+    Author: Alex Semin Math-Mech 271 2013
+    2013 (c)
+
+	#1. Prime numbers
+	#2. Fibonacci numbers
 -}
 
 -----------------------------------------------------------------------------
