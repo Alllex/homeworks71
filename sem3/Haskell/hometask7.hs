@@ -80,16 +80,18 @@ letter = oneOf $ ['_'] ++ ['a'..'z'] ++ ['A'..'Z']
 digit = oneOf ['0'..'9']
 ident = letter ||> (\ x -> many (letter ||| digit) ||> (\ xs -> val $ X (x:xs)))
 literal = digit ||> (\ x -> many digit ||> (\ xs -> val $ N $ read (x:xs)))
+inbrackets = sym '(' ||> (\_ -> expr ||> (\e -> sym1 ')' e))
 
-unary = op ||> (\o -> addi ||> (\e -> val $ o e))
+primary' = 
+  ident   ||| 
+  literal ||| 
+  inbrackets
+
+unary = op ||> (\o -> primary' ||> (\e -> val $ o e))
     where op = sym1 '+' UNPLUS |||
                sym1 '-' UNMINUS
 
-primary = 
-  ident   ||| 
-  literal ||| 
-  unary   |||
-  sym '(' ||> (\_ -> expr ||> (\e -> sym1 ')' e))
+primary = primary' ||| unary
 
 left_assos p op = p ||> (\x -> (many (op ||> (\o -> p ||> (\y -> val $ (o, y))))) 
                                ||> (\xs -> val $ foldl (\acc (o, y) -> acc `o` y) x xs))
