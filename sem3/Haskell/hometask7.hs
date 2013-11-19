@@ -93,15 +93,15 @@ unary = op ||> (\o -> primary' ||> (\e -> val $ o e))
 
 primary = primary' ||| unary
 
-left_assos p op = p ||> (\x -> (many (op ||> (\o -> p ||> (\y -> val $ (o, y))))) 
+left_assoc p op = p ||> (\x -> (many (op ||> (\o -> p ||> (\y -> val $ (o, y))))) 
                                ||> (\xs -> val $ foldl (\acc (o, y) -> acc `o` y) x xs))
 
 bin_op l r op = l ||> (\x -> op ||> (\o -> r ||> (\y -> val $ x `o` y))) ||| l
 
-multi = left_assos primary op
+multi = left_assoc primary op
     where op = sym1 '*' MUL ||| sym1 '/' DIV
 
-addi = left_assos multi op
+addi = left_assoc multi op
     where op = sym1 '+' ADD ||| sym1 '-' SUB              
 
 reli = bin_op addi addi op
