@@ -10,11 +10,10 @@
 --           -empty-      -height- -key- -values- -left-  -right-
 data M a b =    E    | T  Integer   (a,    [b])   (M a b) (M a b)
 
------------------------------------------------------------
-
-empty = E
-
------------------- used in "insert" and "remove" ----------
+instance (Show a, Show b) => Show (M a b) where
+    show E = "E"
+    show (T h p E E) = "leaf[h("++(show h)++") p["++(show p)++"]"
+    show (T h p l r) = "T(h"++(show h)++" p["++(show p)++"] "++(show l)++" "++(show r)++")"
 
 fh E = 0
 fh (T h _ _ _) = h
@@ -28,34 +27,41 @@ balance node@(T h p l r) =
 
 -----------------------------------------------------------
 
-insert E k v = T 1 (k, [v]) E E
-insert t@(T h p@(k, vs) l r) k' v'
-    | k' > k    = balance $ mk p l (insert r k' v')
-    | k' < k    = balance $ mk p (insert l k' v') r
-    | otherwise = T h (k, v':vs) l r
+class Map a b where
+    empty :: M a b
+    insert :: M a b -> a -> b -> M a b
+    find :: M a b -> a -> Maybe b
+    remove :: M a b -> a -> M a b
+    fold :: (a -> b -> c -> c) -> M a b -> c -> c
 
-find E _ = Nothing
-find (T _ (k, v:_) l r) k'
-    | k' > k    = find r k'
-    | k' < k    = find l k'
-    | otherwise = Just v
+instance Ord a => Map a b where
 
-remove E _ = E
-remove t@(T h p@(k, vs) l r) k'
-    | k' > k    = balance $ mk p l (remove r k')
-    | k' < k    = balance $ mk p (remove l k') r
-    | otherwise = 
-        case vs of 
-            [v]   -> case r of E -> l; _ -> let (k', r') = rm r in balance $ mk k' l r'
-            v:vs' -> T h (k, vs') l r   
-    where
-        rm (T _ k E r) = (k, r)
-        rm (T _ k l r) = let (k', l') = rm l in (k', balance $ mk k l' r)
+    empty = E
 
-fold f m acc = foldr (\(k, v) acc' -> f k v acc') acc $ elems m []
-    where elems (T _ (k, v:_) l r) acc = elems l $ (k, v):elems r acc
-          elems _ acc = acc
+    insert E k v = T 1 (k, [v]) E E
+    insert t@(T h p@(k, vs) l r) k' v'
+        | k' > k    = balance $ mk p l (insert r k' v')
+        | k' < k    = balance $ mk p (insert l k' v') r
+        | otherwise = T h (k, v':vs) l r
 
------------------------------------------------------------
+    find E _ = Nothing
+    find (T _ (k, v:_) l r) k'
+        | k' > k    = find r k'
+        | k' < k    = find l k'
+        | otherwise = Just v
 
-elems m = fold (\a b c -> (a,b):c) m []
+    remove E _ = E
+    remove t@(T h p@(k, vs) l r) k'
+        | k' > k    = balance $ mk p l (remove r k')
+        | k' < k    = balance $ mk p (remove l k') r
+        | otherwise = 
+            case vs of 
+                [v]   -> case r of E -> l; _ -> let (k', r') = rm r in balance $ mk k' l r'
+                v:vs' -> T h (k, vs') l r   
+        where
+            rm (T _ k E r) = (k, r)
+            rm (T _ k l r) = let (k', l') = rm l in (k', balance $ mk k l' r)
+
+    fold f m acc = foldr (\(k, v) acc' -> f k v acc') acc $ elems m []
+        where elems (T _ (k, v:_) l r) acc = elems l $ (k, v):elems r acc
+              elems _ acc = acc
