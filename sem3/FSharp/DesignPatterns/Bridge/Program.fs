@@ -1,7 +1,7 @@
 ﻿
 namespace PatternBridge
 
-type GraphicsSystem = WPF | WF
+type GraphicsSystem = WPF | WF // WindowsPresentationFoundation and WindowsForms
 
 [<Interface>]
 type BridgeWindowImp =
@@ -24,11 +24,18 @@ type WFWindow(width: int, height : int) as this =
 
         interface BridgeWindowImp with
             member this.ShowImp() = do Application.Run(this)
-            member this.DecreaseSize() = this.Size <- System.Drawing.Size(this.Width * 2 / 3, this.Height * 2 / 3)
-            member this.IncreaseSize() = this.Size <- System.Drawing.Size(this.Width * 3 / 2, this.Height * 3 / 2)
+
+            member this.DecreaseSize() = 
+                this.Size <- System.Drawing.Size(this.Width * 2 / 3, this.Height * 2 / 3)
+
+            member this.IncreaseSize() = 
+                this.Size <- System.Drawing.Size(this.Width * 3 / 2, this.Height * 3 / 2)
+
             member this.SetTitle(s : string) = this.Text <- s
+
             member this.DrawLine(x1 : int, y1 : int, x2 : int, y2 : int) =
-                    this.Paint.Add(fun e -> e.Graphics.DrawLine(new Pen(Color.FromArgb(255, 0, 0, 0)), x1, y1, x2, y2))
+                let pen = new Pen(Color.FromArgb(255, 0, 0, 0))
+                this.Paint.Add(fun e -> e.Graphics.DrawLine(pen, x1, y1, x2, y2))
     end
 
 open System.Windows
@@ -50,9 +57,16 @@ type WPFWindow(width: int, height : int) as this =
                 let app = new Application()
                 app.Run() |> ignore
 
-            member this.DecreaseSize() = this.Width <- this.Width * 2.0 / 3.0; this.Height <- this.Height * 2.0 / 3.0
-            member this.IncreaseSize() = this.Width <- this.Width * 3.0 / 2.0; this.Height <- this.Height * 3.0 / 2.0
+            member this.DecreaseSize() = 
+                this.Width <- this.Width * 2.0 / 3.0
+                this.Height <- this.Height * 2.0 / 3.0
+
+            member this.IncreaseSize() = 
+                this.Width <- this.Width * 3.0 / 2.0
+                this.Height <- this.Height * 3.0 / 2.0
+
             member this.SetTitle(s : string) = this.Title <- s
+
             member this.DrawLine(x1 : int, y1 : int, x2 : int, y2 : int) =
                 let myLine = new Line()
                 myLine.Stroke <- System.Windows.Media.Brushes.LightSteelBlue
@@ -80,24 +94,24 @@ type BridgeWindow(width: int, height : int) =
               | WF  -> new WFWindow(width, height)  :> BridgeWindowImp
 
     member this.Show() = imp.ShowImp()
-    member this.makeBigger() = imp.IncreaseSize()
-    member this.makeSmaller() = imp.DecreaseSize()
-    member this.drawRect(x1 : int, y1 : int, x2 : int, y2 : int) =
-            imp.DrawLine(x1, y1, x1, y2)
-            imp.DrawLine(x1, y2, x2, y2)
-            imp.DrawLine(x2, y2, x2, y1)
-            imp.DrawLine(x2, y1, x1, y1)
+    member this.MakeBigger() = imp.IncreaseSize()
+    member this.MakeSmaller() = imp.DecreaseSize()
+    member this.DrawRect(x1 : int, y1 : int, x2 : int, y2 : int) =
+        imp.DrawLine(x1, y1, x1, y2)
+        imp.DrawLine(x1, y2, x2, y2)
+        imp.DrawLine(x2, y2, x2, y1)
+        imp.DrawLine(x2, y1, x1, y1)
 
 type BigWindow() as this =
-    class 
+    class
         inherit BridgeWindow(500, 500)
-        do this.drawRect(20, 20, 460, 450)
+        do this.DrawRect(20, 20, 460, 450)
     end
 
 type SmallWindow() as this =
     class 
         inherit BridgeWindow(100, 100)
-        do this.drawRect(20, 20, 60, 50)        
+        do this.DrawRect(20, 20, 60, 50)        
     end
     
 
