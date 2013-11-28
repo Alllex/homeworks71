@@ -59,8 +59,6 @@ type WeatherFactory() =
         member x.CreateLuminary() = new Luminary() :> ILuminary
         member x.CreateWind() = new Wind() :> IWind
 
-
-
 type Cloud(factory : IWeatherFactory) =
     let daylight = factory.CreateDaylight()
     let luminary = factory.CreateLuminary()
