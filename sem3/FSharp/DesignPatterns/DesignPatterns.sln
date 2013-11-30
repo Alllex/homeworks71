@@ -5,6 +5,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DesignPatterns", "DesignPat
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Bridge", "Bridge\Bridge.fsproj", "{893585FB-6EA8-4E7F-8269-137F6F5605F8}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Flyweight", "Flyweight\Flyweight.fsproj", "{1870065B-90C7-4842-B15C-3A4F436D8202}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{893585FB-6EA8-4E7F-8269-137F6F5605F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{893585FB-6EA8-4E7F-8269-137F6F5605F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{893585FB-6EA8-4E7F-8269-137F6F5605F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1870065B-90C7-4842-B15C-3A4F436D8202}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1870065B-90C7-4842-B15C-3A4F436D8202}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1870065B-90C7-4842-B15C-3A4F436D8202}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1870065B-90C7-4842-B15C-3A4F436D8202}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

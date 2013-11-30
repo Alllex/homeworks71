@@ -1,5 +1,5 @@
 infixl 6 +++ 
-class SemiGroup  a where
+class SemiGroup a where
 	(+++) :: a -> a -> a
 
 class SemiGroup a => Monoid a where

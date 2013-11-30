@@ -25,16 +25,16 @@ balance node@(T h p l r) =
     if diff node >  1 then rotateL $ mk p l (if diff r > 0 then r else rotateR r) else 
     if diff node < -1 then rotateR $ mk p (if diff l < 0 then l else rotateL l) r else node
 
------------------------------------------------------------
+----------------------------------------------------------
 
-class Map a b where
-    empty :: M a b
-    insert :: M a b -> a -> b -> M a b
-    find :: M a b -> a -> Maybe b
-    remove :: M a b -> a -> M a b
-    fold :: (a -> b -> c -> c) -> M a b -> c -> c
+class Map m a b where
+    empty :: m a b
+    insert :: m a b -> a -> b -> m a b
+    find :: m a b -> a -> Maybe b
+    remove :: m a b -> a -> m a b
+    fold :: (a -> b -> c -> c) -> m a b -> c -> c
 
-instance Ord a => Map a b where
+instance Ord a => Map M a b where
 
     empty = E
 
@@ -65,3 +65,14 @@ instance Ord a => Map a b where
     fold f m acc = foldr (\(k, v) acc' -> f k v acc') acc $ elems m []
         where elems (T _ (k, v:_) l r) acc = elems l $ (k, v):elems r acc
               elems _ acc = acc
+
+data ML a b = ML [(a, b)]
+
+instance Ord a => Map ML a b where
+    empty = ML []
+    insert (ML m) k v = ML $ (k, v):m
+    find (ML m) k = case filter ((k ==) . fst) m of [] -> Nothing; (_, v):_ -> Just v
+    remove (ML m) k' = ML $ rm [] m
+        where rm acc [] = acc
+              rm acc (x@(k, _):xs) = if k == k' then acc ++ xs else rm (acc ++ [x]) xs
+    fold f (ML m) acc = foldl (\acc' (k, v) -> f k v acc') acc m
