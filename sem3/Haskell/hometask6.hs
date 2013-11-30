@@ -4,7 +4,18 @@
     2013 (c)
 
     #1 Map based on AVL trees
+    #2 Map based on Lists
 -}
+
+
+class Map m a b where
+    empty :: m a b
+    insert :: m a b -> a -> b -> m a b
+    find :: m a b -> a -> Maybe b
+    remove :: m a b -> a -> m a b
+    fold :: (a -> b -> c -> c) -> m a b -> c -> c
+
+----------- implementation via AVL tree --------------
 
 --                                 (   -pair-   )
 --           -empty-      -height- -key- -values- -left-  -right-
@@ -24,15 +35,6 @@ rotateL (T _ p l (T _ rp rl rr)) = mk rp (mk p l rl) rr
 balance node@(T h p l r) =
     if diff node >  1 then rotateL $ mk p l (if diff r > 0 then r else rotateR r) else 
     if diff node < -1 then rotateR $ mk p (if diff l < 0 then l else rotateL l) r else node
-
-----------------------------------------------------------
-
-class Map m a b where
-    empty :: m a b
-    insert :: m a b -> a -> b -> m a b
-    find :: m a b -> a -> Maybe b
-    remove :: m a b -> a -> m a b
-    fold :: (a -> b -> c -> c) -> m a b -> c -> c
 
 instance Ord a => Map M a b where
 
@@ -66,7 +68,9 @@ instance Ord a => Map M a b where
         where elems (T _ (k, v:_) l r) acc = elems l $ (k, v):elems r acc
               elems _ acc = acc
 
-data ML a b = ML [(a, b)]
+----------- implementation via List ------------
+
+data ML a b = ML [(a, b)] deriving Show
 
 instance Ord a => Map ML a b where
     empty = ML []
