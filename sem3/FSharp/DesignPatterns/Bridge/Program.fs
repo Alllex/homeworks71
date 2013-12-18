@@ -1,5 +1,4 @@
-﻿
-namespace PatternBridge
+﻿namespace PatternBridge
 
 type GraphicsSystem = WPF | WF // WindowsPresentationFoundation and WindowsForms
 
