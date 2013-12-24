@@ -29,3 +29,14 @@ for threads in List.rev [for i in 0..5 -> int (Math.Pow(2., (float) i))] do
     let monad() = m1.Mult(m2, threads)
     measureTime monad |> printfn "Count threads: %i; Time: %A" threads
 
+
+(*
+
+Count threads: 32; Time: 00:00:55.1981572
+Count threads: 16; Time: 00:00:55.2901625
+Count threads: 8;  Time: 00:00:55.1411539
+Count threads: 4;  Time: 00:00:52.3509943
+Count threads: 2;  Time: 00:01:05.1637272
+Count threads: 1;  Time: 00:01:54.4265449
+
+*)
