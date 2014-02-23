@@ -1,0 +1,8 @@
+#ignore file for FSharp projects
+
+*/*/bin/
+*/*/obj/
+*/*/Debug/
+*/*/Release/
+*/*.fsx
+*.suo
