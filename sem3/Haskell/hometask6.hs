@@ -8,12 +8,19 @@
 -}
 
 
-class Map m a b where
-    empty :: m a b
-    insert :: m a b -> a -> b -> m a b
-    find :: m a b -> a -> Maybe b
-    remove :: m a b -> a -> m a b
-    fold :: (a -> b -> c -> c) -> m a b -> c -> c
+class Ord a => Map m a where
+    empty :: m a
+    insert :: m a -> a -> b -> m a
+    find :: m a -> a -> Maybe b
+    remove :: m a -> a -> m a
+    fold :: (a -> b -> c -> c) -> m a -> c -> c
+
+instance Ord a => Map (,) a b where
+    empty = undefined
+    insert = undefined
+    find = undefined
+    remove = undefined
+    
 
 ----------- implementation via AVL tree --------------
 
