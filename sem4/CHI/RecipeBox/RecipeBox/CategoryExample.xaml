@@ -1,0 +1,99 @@
+﻿<Window x:Class="RecipeBox.CategoryExample"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="CategoryExample" Height="650" Width="400">
+    <StackPanel>
+        <Grid Margin="5" Height="60">
+            <Border Style="{StaticResource ItemBorderStyle}"
+                    Margin="-20,3,-20,3"
+                    Background="{StaticResource SaladItemColor}">
+                <TextBlock Text="Салаты"
+                           Style="{StaticResource ItemTextStyle}"
+                           Margin="50,0,0,0"/>
+            </Border>
+            <Viewbox HorizontalAlignment="Left" Height="40">
+                <Image Source="Icons/back.png" />
+            </Viewbox>
+        </Grid>
+        <StackPanel>
+            <Border Style="{StaticResource ItemBorderStyle}"
+                    Background="Beige"
+                    Margin="10,10,10,2">
+                <DockPanel LastChildFill="False">
+                    <TextBlock DockPanel.Dock="Top"
+                               HorizontalAlignment="Left"
+                               FontFamily="Georgia"
+                               Foreground="Maroon"
+                               Margin="10"
+                               Text="Оливье по-советски"/>
+                    <Viewbox DockPanel.Dock="Left"
+                             Height="25"
+                             Margin="10,0,10,0">
+                        <Image Source="Icons/clock.png"/>
+                    </Viewbox>
+                    <TextBlock DockPanel.Dock="Left"
+                               Style="{StaticResource ItemTextStyle}"
+                               Foreground="Maroon"
+                               FontSize="25"
+                               Text="1 час"/>
+                    <Viewbox DockPanel.Dock="Right"
+                             Margin="0,0,5,0"
+                             Height="25">
+                        <Image Source="Icons/heart.png"/>
+                    </Viewbox>
+                </DockPanel>
+            </Border>
+            <Border Style="{StaticResource ItemBorderStyle}"
+                    Background="Beige"
+                    Margin="10,2,10,2">
+                <DockPanel LastChildFill="False">
+                    <TextBlock DockPanel.Dock="Top"
+                               HorizontalAlignment="Left"
+                               FontFamily="Georgia"
+                               Foreground="Maroon"
+                               Margin="10"
+                               TextWrapping="Wrap"
+                               Text="Классический греческий салат (Horiatiki)"/>
+                    <Viewbox DockPanel.Dock="Left"
+                             Height="25"
+                             Margin="10,0,10,0">
+                        <Image Source="Icons/clock.png"/>
+                    </Viewbox>
+                    <TextBlock DockPanel.Dock="Left"
+                               Style="{StaticResource ItemTextStyle}"
+                               Foreground="Maroon"
+                               FontSize="25"
+                               Text="15 мин"/>
+                </DockPanel>
+            </Border>
+            <Border Style="{StaticResource ItemBorderStyle}"
+                    Background="Beige"
+                    Margin="10,2,10,2">
+                <DockPanel LastChildFill="False">
+                    <TextBlock DockPanel.Dock="Top"
+                               HorizontalAlignment="Left"
+                               FontFamily="Georgia"
+                               Foreground="Maroon"
+                               Margin="10"
+                               TextWrapping="Wrap"
+                               Text="Итальянский салат с ветчиной, сыром и овощами"/>
+                    <Viewbox DockPanel.Dock="Left"
+                             Height="25"
+                             Margin="10,0,10,0">
+                        <Image Source="Icons/clock.png"/>
+                    </Viewbox>
+                    <TextBlock DockPanel.Dock="Left"
+                               Style="{StaticResource ItemTextStyle}"
+                               Foreground="Maroon"
+                               FontSize="25"
+                               Text="30 мин"/>
+                    <Viewbox DockPanel.Dock="Right"
+                             Margin="0,0,5,0"
+                             Height="25">
+                        <Image Source="Icons/heart.png"/>
+                    </Viewbox>
+                </DockPanel>
+            </Border>
+        </StackPanel>
+    </StackPanel>
+</Window>

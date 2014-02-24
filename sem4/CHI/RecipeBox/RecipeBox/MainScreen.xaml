@@ -1,0 +1,137 @@
+﻿<Window x:Class="RecipeBox.MainScreen"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainScreen" Height="650" Width="400">
+    <StackPanel>
+        <Grid Margin="5" Height="60">
+            <Border Style="{StaticResource ItemBorderStyle}"
+                    Margin="-20,3,-20,3"
+                    Background="{StaticResource MainTitleColor}">
+                <TextBlock Text="Сборник рецептов"
+                           Style="{StaticResource ItemTextStyle}"
+                           Margin="50,0,0,0"/>
+            </Border>
+            <Viewbox HorizontalAlignment="Left">
+                <Image Source="Icons/settings.png"/>
+            </Viewbox>
+        </Grid>
+        <StackPanel Orientation="Horizontal">
+            <StackPanel Margin="5,10,5,5">
+                <Border Style="{StaticResource ItemBorderStyle}"
+                    Margin="-20,0,10,0"
+                    Background="{StaticResource SearchItemColor}"
+                    Height="50"
+                    Width="250"
+                    HorizontalAlignment="Left">
+                    <DockPanel LastChildFill="False">
+                        <TextBlock Text="Поиск"
+                           Style="{StaticResource ItemTextStyle}"
+                           DockPanel.Dock="Left"
+                           Margin="25,0,0,0"/>
+                        <Viewbox DockPanel.Dock="Right"
+                             Margin="0,0,5,0">
+                            <Image Source="Icons/search.png"/>
+                        </Viewbox>
+                    </DockPanel>
+                </Border>
+                <Border Style="{StaticResource ItemBorderStyle}"
+                    Margin="-20,0,10,0"
+                    Background="{StaticResource RecentItemColor}"
+                    Height="50"
+                    Width="250"
+                    HorizontalAlignment="Left">
+                    <DockPanel LastChildFill="False">
+                        <TextBlock Text="Недавние"
+                           Style="{StaticResource ItemTextStyle}"
+                           DockPanel.Dock="Left"
+                           Margin="25,0,0,0"/>
+                        <Viewbox DockPanel.Dock="Right"
+                             Margin="0,0,5,0">
+                            <Image Source="Icons/clock.png"/>
+                        </Viewbox>
+                    </DockPanel>
+                </Border>
+                <Border Style="{StaticResource ItemBorderStyle}"
+                    Margin="-20,0,10,0"
+                    Background="{StaticResource LovelyItemColor}"
+                    Height="50"
+                    Width="250"
+                    HorizontalAlignment="Left">
+                    <DockPanel LastChildFill="False">
+                        <TextBlock Text="Любимые"
+                           Style="{StaticResource ItemTextStyle}"
+                           DockPanel.Dock="Left"
+                           Margin="25,0,0,0"/>
+                        <Viewbox DockPanel.Dock="Right"
+                             Margin="0,0,5,0">
+                            <Image Source="Icons/heart.png"/>
+                        </Viewbox>
+                    </DockPanel>
+                </Border>
+            </StackPanel>
+            <Viewbox Height="160">
+                <Image Source="Icons/cook.png"/>
+            </Viewbox>
+        </StackPanel>
+        
+        <StackPanel Margin="0,5,0,0">
+            <Border Style="{StaticResource ItemBorderStyle}"
+                    Margin="10,0,-20,0"
+                    Background="{StaticResource AppetizerItemColor}"
+                    Height="50"
+                    Width="350"
+                    HorizontalAlignment="Right">
+                <TextBlock Text="Закуски" Style="{StaticResource ItemTextStyle}" />
+            </Border>
+            <Border Style="{StaticResource ItemBorderStyle}"
+                    Margin="10,0,-20,0"
+                    Background="{StaticResource SaladItemColor}"
+                    Height="50"
+                    Width="350"
+                    HorizontalAlignment="Right">
+                <TextBlock Text="Салаты" Style="{StaticResource ItemTextStyle}" />
+            </Border>
+            <Border Style="{StaticResource ItemBorderStyle}"
+                    Margin="10,0,-20,0"
+                    Background="{StaticResource SoupItemColor}"
+                    Height="50"
+                    Width="350"
+                    HorizontalAlignment="Right">
+                <TextBlock Text="Первое" Style="{StaticResource ItemTextStyle}" 
+                           Foreground="Black"/>
+            </Border>
+            <Border Style="{StaticResource ItemBorderStyle}"
+                    Margin="10,0,-20,0"
+                    Background="{StaticResource MainDishItemColor}"
+                    Height="50"
+                    Width="350"
+                    HorizontalAlignment="Right">
+                <TextBlock Text="Второе" Style="{StaticResource ItemTextStyle}" />
+            </Border>
+            <Border Style="{StaticResource ItemBorderStyle}"
+                    Margin="10,0,-20,0"
+                    Background="{StaticResource DessertItemColor}"
+                    Height="50"
+                    Width="350"
+                    HorizontalAlignment="Right">
+                <TextBlock Text="Десерты" Style="{StaticResource ItemTextStyle}" />
+            </Border>
+            <Border Style="{StaticResource ItemBorderStyle}"
+                    Margin="10,0,-20,0"
+                    Background="{StaticResource DrinkItemColor}"
+                    Height="50"
+                    Width="350"
+                    HorizontalAlignment="Right">
+                <TextBlock Text="Напитки" Style="{StaticResource ItemTextStyle}" />
+            </Border>
+            <Border Style="{StaticResource ItemBorderStyle}"
+                    Margin="10,0,-20,0"
+                    Background="{StaticResource OtherItemColor}"
+                    Height="50"
+                    Width="350"
+                    HorizontalAlignment="Right">
+                <TextBlock Text="Другое" Style="{StaticResource ItemTextStyle}" />
+            </Border>
+        </StackPanel>
+    </StackPanel>
+</Window>
