@@ -5,7 +5,7 @@
     <StackPanel>
         <Button Content="MainScreen" Margin="5,20,5,0" Click="Button_Click"/>
         <Button Content="CategoryScreen" Margin="5,20,5,0" Click="Button_Click_1"/>
-        <Button Content="DishExample" Margin="5,20,5,0"/>
+        <Button Content="DishExample" Margin="5,20,5,0" Click="Button_Click_2"/>
 
     </StackPanel>
 </Window>

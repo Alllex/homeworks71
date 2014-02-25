@@ -5,7 +5,7 @@
 
     <SolidColorBrush x:Key="SearchItemColor">LightSkyBlue</SolidColorBrush>
     <SolidColorBrush x:Key="RecentItemColor">Orange</SolidColorBrush>
-    <SolidColorBrush x:Key="LovelyItemColor">OrangeRed</SolidColorBrush>
+    <SolidColorBrush x:Key="LovelyItemColor">#f9008b</SolidColorBrush>
 
     <SolidColorBrush x:Key="AppetizerItemColor">#ff4228</SolidColorBrush>
     <SolidColorBrush x:Key="SaladItemColor">#33ba30</SolidColorBrush>

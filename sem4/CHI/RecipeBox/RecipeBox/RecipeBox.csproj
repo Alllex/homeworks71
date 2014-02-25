@@ -63,6 +63,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="DishExample.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainScreen.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -77,6 +81,9 @@
     </Compile>
     <Compile Include="CategoryExample.xaml.cs">
       <DependentUpon>CategoryExample.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="DishExample.xaml.cs">
+      <DependentUpon>DishExample.xaml</DependentUpon>
     </Compile>
     <Compile Include="MainScreen.xaml.cs">
       <DependentUpon>MainScreen.xaml</DependentUpon>
@@ -135,6 +142,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\back.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\recipe1.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
