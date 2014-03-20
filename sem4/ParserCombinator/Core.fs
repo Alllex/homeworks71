@@ -254,11 +254,3 @@ let pfloat : Parser<float> =
         let! d = sym '.' >|>> many1 pdigit |> optf id []
         return float (chars2str <| sign::(i @ d))
     }
-
-/// Parses p splitted by c as many times as possible
-let splitter p spl =
-    p >|>> many (spl >>. p) 
-
-/// Parses p splitted by c as many times as possible, ignoring white space
-let splitterws p spl = 
-    skipws p >|>> many (skipws spl >>. skipws p)
