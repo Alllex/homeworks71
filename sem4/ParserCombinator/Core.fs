@@ -7,80 +7,60 @@ let chars2str cs = string (new System.String (cs |> List.toArray))
 let chars2int s = int (new System.String(s |> List.toArray))
 let str2chars (s : string) = List.ofArray <| s.ToCharArray()     
 
-type ParserInfo(str : char list, line : int, col : int, expected : string) =
-    class
-        (*
-        new(str : char list, line : int, col : int, expected : string) = new ParserInfo(str, line, col, expected, "")
-        *)
-        new(pi : ParserInfo, expected : string) = new ParserInfo(pi.Rest, pi.Line, pi.Column, expected)
-        member x.Rest = str
-        member x.Line = line
-        member x.Column = col
-        member x.ExpectedValue = expected
-        member x.IsSucceeded() = str.Length = 0 
-        (*
-        member x.HasError() = Option.isSome err
-        member x.IsStopped() = str.Length > 0 && not (x.HasError())
-        member x.ErrorMessage = if x.HasError() then err.Value.ErrorMessage else ""
-        *)
-        interface IComparable with
-            member x.CompareTo(o : obj) =
-                match o with
-                | :? ParserInfo as y -> str.Length.CompareTo(y.Rest.Length)
-                | _ -> -1
-        override x.Equals(o : obj) = 
+type Position(position : int, line : int, column : int) =
+  class  
+    new() = new Position(0, 0, 0)
+    member x.Position = position
+    member x.Line = line
+    member x.Column = column
+    member x.Update(c : char) = 
+        let newline = c = '\n'
+        new Position(position + 1, line + (if newline then 1 else 0), if newline then 0 else column + 1)
+
+    interface IComparable with
+        member x.CompareTo(o : obj) =
             match o with
-            | :? ParserInfo as y -> line = y.Line && col = y.Column && str = y.Rest
-            | _ -> false
-        override x.GetHashCode() = str.GetHashCode()
-        override x.ToString() =
-            let cut (len : int) (s : string) =
-                if s.Length > len then s.Substring(0, len)
-                else s
-            let s = sprintf "Parser stopped at line %d, column %d, where \"%s...\"" line col (cut 10 <| chars2str str)
-                    //+ if not (x.HasError()) then "" else "With error:\n" + x.ErrorMessage
-            s
+            | :? Position as y -> y.Position.CompareTo(position)
+            | _ -> -1
 
-        static member StartInfo(s : string) = new ParserInfo(str2chars s, 0, 0, "")
-        //static member UnknownErrorInfo = new ParserInfo([], 0, 0, Some <| ParserError.UnknownParserError)
-    end
+    override x.Equals(o : obj) =
+        match o with
+        | :? Position as y -> position.Equals(y.Position)
+        | _ -> false
 
-type ParserError(line : int, col : int, expected : string, errmsg : string) =
-    class
-        let exp = sprintf "Error: At line %d, column %d expected \"%s\"" line col expected
-        let error = if errmsg.Length = 0 then exp else errmsg
-        new(line : int, col : int, expected : string) = new ParserError(line, col, expected, "")
-        new(pi : ParserInfo, expected : string, errmsg : string) = new ParserError(pi.Line, pi.Column, expected, errmsg)
-        new(pi : ParserInfo, errmsg : string) = new ParserError(pi.Line, pi.Column, pi.ExpectedValue, errmsg)
-        member x.Line = line
-        member x.Column = col
-        member x.ExpectedValue = expected
-        member x.ErrorMessage = error
-        static member SymfParserErrorMsg = "Character doesn't match the function"
-        static member UnknownParserError = new ParserError(0, 0, "", "Unknown parser error")
+    override x.GetHashCode() = (position ^^^ column).GetHashCode()
+  end
 
-        interface IComparable with
-            member x.CompareTo(o : obj) =
-                match o with
-                | :? ParserError as y -> if line > y.Line then -1 else col.CompareTo(y.Column) 
-                | _ -> -1
-        override x.Equals(o : obj) = 
-            match o with
-            | :? ParserError as y -> line = y.Line && col = y.Column
-            | _ -> false
-        override x.GetHashCode() = exp.GetHashCode()
-        
-        override x.ToString() = x.ErrorMessage
-    end
+type ParserError(err : string) =
+  class
+    member x.ErrorMessage = err
+  end
+
+type ParserInfo(str : char list, pos : Position, err : ParserError option) =
+  class
+    new(str : char list, pos : Position) = new ParserInfo(str, pos, None)
+
+    member x.Rest = str
+    member x.Position = pos
+    member x.HasError = Option.isSome err
+    member x.Error = 
+        match err with
+        | Some e -> e
+        | None   -> new ParserError("No parser error")
+
+    member x.Stop(err : ParserError) =
+        new ParserInfo(str, pos, Some err)
+
+    member x.IsEof = str.Length = 0
+
+    static member StartInfo(s : string) = new ParserInfo(str2chars s, new Position())
+  end
     
-type ParserResult<'a> = Success of 'a
-                      | Failure of ParserError   
-                      
-type ParserTempResult<'a> = 
-        | S of 'a * ParserInfo
-        | F of ParserError  
+type ParserResult<'a> = 
+    | S of 'a * ParserInfo
+    | F of ParserInfo
 
-type internal Parser<'a> = ParserInfo -> (ParserTempResult<'a>) seq
+type internal Parser<'a> = ParserInfo -> (ParserResult<'a>) seq
   
 let internal yield' x = seq { yield x }
 
@@ -88,16 +68,20 @@ let internal yield' x = seq { yield x }
 let value x : Parser<'a> =
     fun pi -> yield' <| S(x, pi)
 
-/// Always fails.
+/// Always empty.
 let empty : Parser<'a> =
     fun _ -> Seq.empty
+
+/// Alwaus fails.
+let fails (err : ParserError) : Parser<'a> =
+    fun pi -> yield' <| F(pi.Stop(err))
 
 /// Bind operator. Applies f to the result of parser p.
 let (>>=) (p : Parser<'a>) (f : 'a -> Parser<'b>) : Parser<'b> =
     let apply (f : 'a -> Parser<'b>) = 
         function
         | S(a, pi) -> (f a) pi
-        | F(e) -> yield' <| F(e)
+        | F(pi) -> yield' <| F(pi)
     fun pi -> Seq.concat (seq { for x in p pi do yield apply f x })
 
 /// Applies the first parser and if it fails, applies the second one.
@@ -108,25 +92,26 @@ let (<|>) (p1 : Parser<'a>) (p2 : Parser<'a>) : Parser<'a> =
 let symf f : Parser<char> =
     fun pi -> 
         match pi.Rest with
-        | c::nrest when f c -> 
-            let nline = pi.Line + (if c = '\n' then 1 else 0)
-            let ncol = pi.Column + 1
-            yield' <| S(c, new ParserInfo(nrest, nline, ncol, pi.ExpectedValue))
-        | _ -> 
-            let exp = pi.ExpectedValue
-            let err = if exp.Length <> 0 then new ParserError(pi, exp, "") else new ParserError(pi, ParserError.SymfParserErrorMsg)
-            yield' <| F(err)
+        | c::nrest when f c -> yield' <| S(c, new ParserInfo(nrest, pi.Position.Update(c)))
+        | _ -> yield' <| F(pi.Stop(new ParserError ("Symf error")))
 
 /// Runs the given parser against the given string.
 let run (p : Parser<'a>) (s : string) = 
     let results = p <| ParserInfo.StartInfo(s)
     let succ = results
-               |> Seq.filter (fun x -> match x with S(_, pi) -> pi.IsSucceeded() | _ -> false)
-               |> Seq.map (fun (S(a, _)) -> a)
+               |> Seq.filter (function S(_, _) -> true | _ -> false)
     if Seq.isEmpty succ 
     then 
-         Failure(ParserError.UnknownParserError)
-    else Success(Seq.head succ) 
+         let errors = 
+             results
+             |> Seq.map (function S(_, pi) -> pi | F(pi) -> pi)
+             |> Seq.sortBy (fun pi -> pi.Position)
+         if Seq.isEmpty errors
+         then F(ParserInfo.StartInfo("").Stop(new ParserError("Unknown parser error")))
+         else errors
+              |> Seq.head
+              |> F
+    else Seq.head succ
 
 type ParserBuilder() =
     member x.Bind(p, f) = p >>= f
@@ -198,7 +183,7 @@ let between popen p pclose =
 
 /// Parses the given character.
 let sym c : Parser<char> = 
-    fun pi -> symf ((=) c) (new ParserInfo(pi, "symbol \'" + chars2str [c] + "\'"))
+    symf ((=) c) <|> fails (new ParserError(sprintf "symbol \'%c\' is expected" c))
 
 /// Parses any of given character
 let syms cs : Parser<char> =
