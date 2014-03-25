@@ -20,7 +20,7 @@ type ``Basic parser operators``() =
     member x.``Value tests``() =
         Assert.True(isSucc 5 <| run (value 5) "")
         Assert.True(isSucc "abc" <| run (value "abc") "")
-        Assert.True(isSucc 9 <| run (value 9) "a")
+        Assert.True(isFail <| run (value 9) "a")
 
     [<Test>]
     member x.``Empty tests``() =
@@ -38,7 +38,7 @@ type ``Basic parser operators``() =
     member x.``Sym tests``() =
         Assert.True(isSucc 'a' <| run (sym 'a') "a")
         Assert.True(isFail <| run (sym 'a') "b")
-        Assert.True(isSucc 'a' <| run (sym 'a') "ax")
+        Assert.True(isFail <| run (sym 'a') "ax")
 
     [<Test>]
     member x.``Operator (<|>) tests``() =
@@ -95,4 +95,4 @@ type ``Integer parsing``() =
         Assert.True(isSucc 0 <| run pint "00")
         Assert.True(isSucc 123 <| run pint "0123")
         Assert.True(isSucc 0 <| run pint "-0")
-        Assert.True(isSucc 3 <| run pint "3.14")
+        Assert.True(isFail <| run pint "3.14")
