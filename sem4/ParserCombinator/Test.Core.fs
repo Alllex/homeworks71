@@ -14,6 +14,7 @@ let isFail =
     | F _ -> true
     | _ -> false
 
+[<TestFixture>]
 type ``Basic parser operators``() =
     [<Test>]
     member x.``Value tests``() =
