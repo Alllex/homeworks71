@@ -99,7 +99,7 @@ let symf f : Parser<char> =
 let run (p : Parser<'a>) (s : string) = 
     let results = p <| ParserInfo.StartInfo(s)
     let succ = results
-               |> Seq.filter (function S(_, _) -> true | _ -> false)
+               |> Seq.filter (function S(_, pi) -> pi.IsEof | _ -> false)
     if Seq.isEmpty succ 
     then 
          let errors = 
@@ -207,10 +207,10 @@ let pword = palpha
             |> many1 |>> chars2str
 
 /// Parses white space characters. Useful for skipping them.
-let pwhitesp = many <| syms [' '; '\t'; '\n'; '\r']
+let pws = many <| syms [' '; '\t'; '\n'; '\r']
 
 /// Makes p skip white space before its parsing
-let skipws p = pwhitesp >>. p
+let skipws p = pws >>. p
 
 /// Parses the given char and skips white space characters.
 let symw c : Parser<char> = skipws (sym c)
