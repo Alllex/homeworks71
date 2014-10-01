@@ -5,12 +5,24 @@
 
 
 def is_nonterm(a): return a.istitle()
+def is_term(a): return not is_nonterm(a)
 
 class Rule:
 
     def __init__(self, head, body):
         self.head = head
         self.body = body
+
+    def __eq__(self, other):
+        if isinstance(other, Rule):
+            return self.head == other.head and self.body == other.body
+        return NotImplemented
+
+    def __ne__(self, other):
+        result = self.__eq__(other)
+        if result is NotImplemented:
+            return result
+        return not result
 
     # def __repr__(self):
     #     def mk_line(b): return '{0} -> {1}'.format(self.head, ' '.join(b))
@@ -19,9 +31,11 @@ class Rule:
     # def __repr__(self):
     #     return '{0} -> {1}'.format(self.head, ' |'.join(map(lambda b: ' '.join(b), self.bodies)))
 
-    def __repr__(self):
-        return '{0} -> {1}'.format(self.head, ' '.join(self.body))
+    def __repr__(self): return '{0} -> {1}'.format(self.head, ' '.join(self.body))
         # return '{0} -> {1}'.format(self.head, self.body)
+
+    def __hash__(self):
+        return hash(str([self.head] + self.body))
 
     def is_eps(self): return len(self.body) == 0
     def is_chain(self): return len(self.body) == 1 and is_nonterm(self.body[0]) and self.head != self.body[0]
@@ -30,17 +44,22 @@ class Rule:
     # def append(self, body):
     #     Rule(self.head, self.bodies.append(body))
 
+    def rename(self, old, new):
+        if self.head == old: self.head = new
+        self.body = map(lambda a: new if a == old else a, self.body)
+
 class Grammar:
 
     def __init__(self, lines):
         rules = self.__parse(lines)
         if len(rules) == 0: raise Exception('Empty grammar!')
         self.axiom = rules[0][0]
-        self.nonterms = self.__get_nonterms(rules)
         self.rules = self.__mk_grammar(rules)
+        self.__counter = 0
+        self.__rm_unheaded()
 
-    # def __repr__(self):
-    #     return '\n'.join(['Axiom: %s' % self.axiom] + [str(r) for r in self.rules])
+    def __repr__(self):
+        return '\n'.join(['Axiom: %s' % self.axiom] + [str(r) for r in self.rules])
 
     def __parse(self, lines):
         rules = []
@@ -50,53 +69,72 @@ class Grammar:
             rules.append((lexemes[0], lexemes[2:]))
         return rules
 
-    def __get_nonterms(self, rules): return list(set([r[0] for r in rules]))
+    # def __get_nonterms(self): return list(set([r[0] for r in rules]))
 
     def __mk_grammar(self, rules):
         return map(lambda r: Rule(r[0], r[1]), rules)
 
+    def __gen_name(self, a):
+        self.__counter += 1
+        return a + str(self.__counter)
+
+    def distinct(self):
+        self.rules = list(set(self.rules))
+
+    def __rm_unheaded(self):
+        heads = map(lambda r: r.head, self.rules)
+        self.rules = [r for r in self.rules if all([is_term(a) or a in heads for a in r.body])]
+
+    def __rm_eps(self, eps_rule):
+        rest_rules = [r for r in self.rules if r != eps_rule]
+        old_name = eps_rule.head
+        new_name = self.__gen_name(eps_rule.head)
+        if old_name == self.axiom: self.axiom = new_name
+        new_rules = []
+        for r in rest_rules:
+            if r.has_in_body(old_name):
+                for i in xrange(len(r.body)):
+                    if r.body[i] == old_name:
+                        left = r.body[:i]
+                        right = r.body[(i+1):]
+                        new_rules.append(Rule(r.head, left + [new_name] + right))
+                        new_rules.append(Rule(r.head, left + right))
+            else:
+                new_rules.append(r)
+        for r in new_rules: r.rename(old_name, new_name)
+        self.rules = new_rules
+        self.distinct()
+        self.__rm_unheaded()
+
     def rm_epses(self):
         changed = True
-        g = self.rules
         while changed:
             changed = False
-            for r in g:
+            for r in self.rules:
                 if r.is_eps():
                     changed = True
-                    gg = []
-                    for rr in g:
-                        if rr != r:
-                            new_rules = [rr]
-                            i = 0
-                            for a in rr.body:
-                                if a == r.head:
-                                    new_body = rr.body[:i] + rr.body[(i + 1):]
-                                    new_rules.append(Rule(rr.head, new_body))
-                                i += 1
-                            gg += new_rules
-                    g = gg
+                    self.__rm_eps(r)
                     break
-        self.rules = g
 
     # DOESN'T WORK!!
-    def rm_chains(self):
-        changed = True
-        g = self.rules
-        while changed:
-            changed = False
-            for r in g:
-                # print(r)
-                if r.is_chain():
-                    changed = True
-                    gg = []
-                    for rr in g:
-                        if rr != r:
-                            if rr.head == r.body[0]: gg.append(Rule(r.head, rr.body))
-                            gg.append(rr)
-                    g = list(set(gg))
-                    print(g)
-                    break
-        self.rules = g
+    # def rm_chains(self):
+    #     changed = True
+    #     g = self.rules
+    #     while changed:
+    #         changed = False
+    #         for r in g:
+    #             # print(r)
+    #             if r.is_chain():
+    #                 changed = True
+    #                 gg = []
+    #                 for rr in g:
+    #                     if rr != r:
+    #                         if rr.head == r.body[0]: gg.append(Rule(r.head, rr.body))
+    #                         gg.append(rr)
+    #                 g = list(set(gg))
+    #                 print(g)
+    #                 break
+    #     self.rules = g
 
 # def rm_epses(g): return [rule for rule in g if not is_eps_rule(rule)]
 
@@ -166,11 +204,11 @@ class Grammar:
 def default_grammar():
     return """
 S -> A
-A -> a A
-A -> 
+A -> B
 B -> C
-C -> C C
-C -> 
+C -> D
+D -> 
+D -> x
     """.split('\n')
 
 def main():
@@ -181,19 +219,13 @@ def main():
     else: 
         # translate_to_CNF(default_grammar())
         g = Grammar(default_grammar())
-        print(g)
+        # print(g)
         g.rm_epses()
         print(g)
-        g.rm_chains()
-        print(g)
+        # g.rm_epses()
+        # print(g)
+        # g.rm_chains()
+        # print(g)
 
 if __name__ == '__main__':
     main()
-
-# xs = range(1, 6)
-# print(xs[0:])
-# print(xs[2:])
-# print(xs[4:])
-# for i in range(0, 5):
-#     ys = xs[:i] + xs[(i+1):]
-#     print(ys)
