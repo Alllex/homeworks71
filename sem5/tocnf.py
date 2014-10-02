@@ -40,6 +40,7 @@ class Rule:
     def is_eps(self): return len(self.body) == 0
     def is_chain(self): return len(self.body) == 1 and is_nonterm(self.body[0]) and self.head != self.body[0]
     def is_self_prod(self): return len(self.body) == 1 and self.head == self.body[0]
+    def is_finite(self): return len(self.body) == 1 and is_term(self.body[0])
     def has_in_body(self, a): return a in self.body
 
     def reachable(self): return list(set([a for a in self.body if is_nonterm(a) and a != self.head]))
@@ -80,6 +81,10 @@ class Grammar:
     def __gen_name(self, a):
         self.__counter += 1
         return a + str(self.__counter)
+
+    def __gen_name(self):
+        self.__counter += 1
+        return 'T' + str(self.__counter)
 
     def __distinct(self):
         self.rules = list(set(self.rules))
@@ -168,8 +173,41 @@ class Grammar:
             new = [a for a in found if not a in reachable]
         self.rules = [r for r in self.rules if r.head in reachable]
 
+    def __mk_fake_nonterms(self):
+        new_rules = []
+        for r in self.rules:
+            if not r.is_finite():
+                new_body = []
+                for a in r.body:
+                    if is_term(a):
+                        new_nonterm = self.__gen_name()
+                        new_rules.append(Rule(new_nonterm, a))
+                        new_body.append(new_nonterm)
+                    else:
+                        new_body.append(a)
+                new_rules.append(Rule(r.head, new_body))
+            else:
+                new_rules.append(r)
+        self.rules = new_rules
+
+    def __reduce_body_len(self):
+        new_rules = []
+        for r in self.rules:
+            if len(r.body) > 2:
+                one = r.body[0]
+                for two in r.body[1:-1]:
+                    new_nonterm = self.__gen_name()
+                    new_rules.append(Rule(new_nonterm, [one, two]))
+                    one = new_nonterm
+                new_rules.append(Rule(r.head, [one, r.body[-1]]))
+            else:
+                new_rules.append(r)
+        self.rules = new_rules
+
     def clear_up(self):
-        
+        self.__mk_fake_nonterms()
+        self.__reduce_body_len()
+
 
 def rm_nonproductive(g):
     found = True
@@ -220,19 +258,11 @@ def rm_nonproductive(g):
 
 def default_grammar():
     return """
-S -> A
-A -> B
+S -> A x B  y C z D
+A -> a
 B -> b
-S -> C
-C -> D
-D -> D D
-S -> E
-E -> F
-F -> F F
-F -> f
-S -> K
-K -> K
-
+C -> c
+D -> d
     """.split('\n')
 
 def main():
@@ -249,6 +279,8 @@ def main():
         g.rm_chains()
         print(g)
         g.rm_unreach()
+        print(g)
+        g.clear_up()
         print('Final grammar:')
         print(g)
 
