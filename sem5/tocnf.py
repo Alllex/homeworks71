@@ -39,8 +39,11 @@ class Rule:
 
     def is_eps(self): return len(self.body) == 0
     def is_chain(self): return len(self.body) == 1 and is_nonterm(self.body[0]) and self.head != self.body[0]
-
+    def is_self_prod(self): return len(self.body) == 1 and self.head == self.body[0]
     def has_in_body(self, a): return a in self.body
+
+    def reachable(self): return list(set([a for a in self.body if is_nonterm(a) and a != self.head]))
+
     # def append(self, body):
     #     Rule(self.head, self.bodies.append(body))
 
@@ -78,15 +81,23 @@ class Grammar:
         self.__counter += 1
         return a + str(self.__counter)
 
-    def distinct(self):
+    def __distinct(self):
         self.rules = list(set(self.rules))
 
     def __rm_unheaded(self):
         heads = map(lambda r: r.head, self.rules)
         self.rules = [r for r in self.rules if all([is_term(a) or a in heads for a in r.body])]
 
+    def __rm_self_prod(self):
+        self.rules = [r for r in self.rules if not r.is_self_prod()]
+
+    def __filter_bad_rules(self):
+        self.__rm_self_prod()
+        self.__rm_unheaded()
+        self.__distinct()
+
     def __rm_eps(self, eps_rule):
-        rest_rules = [r for r in self.rules if r != eps_rule]
+        rest_rules = (r for r in self.rules if r != eps_rule)
         old_name = eps_rule.head
         new_name = self.__gen_name(eps_rule.head)
         if old_name == self.axiom: self.axiom = new_name
@@ -103,8 +114,7 @@ class Grammar:
                 new_rules.append(r)
         for r in new_rules: r.rename(old_name, new_name)
         self.rules = new_rules
-        self.distinct()
-        self.__rm_unheaded()
+        self.__filter_bad_rules()
 
     def rm_epses(self):
         changed = True
@@ -116,76 +126,83 @@ class Grammar:
                     self.__rm_eps(r)
                     break
 
-    # DOESN'T WORK!!
-    # def rm_chains(self):
-    #     changed = True
-    #     g = self.rules
-    #     while changed:
-    #         changed = False
-    #         for r in g:
-    #             # print(r)
-    #             if r.is_chain():
-    #                 changed = True
-    #                 gg = []
-    #                 for rr in g:
-    #                     if rr != r:
-    #                         if rr.head == r.body[0]: gg.append(Rule(r.head, rr.body))
-    #                         gg.append(rr)
-    #                 g = list(set(gg))
-    #                 print(g)
-    #                 break
-    #     self.rules = g
+    def __rm_chain(self, chain_rule):
+        rest_rules = [r for r in self.rules if r != chain_rule]
+        head = chain_rule.head
+        mid_nonterm = chain_rule.body[0]
+        new_rules = rest_rules[:]
+        for r in rest_rules:
+            if r.head == mid_nonterm:
+                new_rules.append(Rule(head, r.body))
 
-# def rm_epses(g): return [rule for rule in g if not is_eps_rule(rule)]
+        self.rules = new_rules
+        self.__filter_bad_rules()
 
-# def rm_chains(g):
-#     changed = True
-#     while changed:
-#         changed = False
-#         for r in g:
-#             if is_chain_rule(r):
-#                 changed = True
-#                 gg = []
-#                 for rr in g:
-#                     if rr != r:
-#                         if rr[0] == r[1][0]: gg.append((r[0], rr[1]))
-#                         gg.append(rr)
-#                 g = gg
-#                 break
-#     return g
+    def rm_chains(self):
+        changed = True
+        while changed:
+            changed = False
+            for r in self.rules:
+                if r.is_chain():
+                    changed = True
+                    self.__rm_chain(r)
+                    break
 
-# def rm_nonproductive(g):
-#     found = True
-#     prod = []
-#     nonterms = list(set([r[0] for r in g]))
-#     while found:
-#         found = False
-#         for nt in nonterms:
-#             if not nt in prod:
-#                 bodies = [r[1] for r in g if r[0] == nt]
-#                 is_prod = True
-#                 for b in bodies:
-#                     nts = [a for a in b if is_nonterm(a)]
-#                     for a in nts:
-#                         if not a in prod:
-#                             is_prod = False
-#                             break
-#                     if not is_prod: break
-#                 if is_prod:
-#                     prod.append(nt)
-#                     found = True
-#     nonprod = [a for a in nonterms if not a in prod]
-#     filtered = []
-#     for r in g:
-#         if not r[0] in nonprod:
-#             nts = [a for a in r[1] if is_nonterm(a)]
-#             is_prod = True
-#             for nt in nts:
-#                 if nt in nonprod:
-#                     is_prod = False
-#                     break
-#             if is_prod: filtered.append(r)
-#     return filtered
+    # def rm_nonprod(self):
+
+    def __find_reachable(self, a):
+        reachable = []
+        for r in self.rules:
+            if a == r.head:
+                reachable += r.reachable()
+        return list(set(reachable))
+
+    def rm_unreach(self):
+        reachable = []
+        new = [self.axiom]
+        while len(new) > 0:
+            found = []
+            for a in new:
+                found += self.__find_reachable(a)
+            reachable += new
+            new = [a for a in found if not a in reachable]
+        self.rules = [r for r in self.rules if r.head in reachable]
+
+    def clear_up(self):
+        
+
+def rm_nonproductive(g):
+    found = True
+    prod = []
+    nonterms = list(set([r[0] for r in g]))
+    while found:
+        found = False
+        for nt in nonterms:
+            if not nt in prod:
+                bodies = [r[1] for r in g if r[0] == nt]
+                is_prod = True
+                for b in bodies:
+                    nts = [a for a in b if is_nonterm(a)]
+                    for a in nts:
+                        if not a in prod:
+                            is_prod = False
+                            break
+                    if not is_prod: break
+                if is_prod:
+                    prod.append(nt)
+                    found = True
+    nonprod = [a for a in nonterms if not a in prod]
+    filtered = []
+    for r in g:
+        if not r[0] in nonprod:
+            nts = [a for a in r[1] if is_nonterm(a)]
+            is_prod = True
+            for nt in nts:
+                if nt in nonprod:
+                    is_prod = False
+                    break
+            if is_prod: filtered.append(r)
+    return filtered
 
 # def read_input(gfile):
 #     with open(gfile, 'r') as f:
@@ -205,10 +222,17 @@ def default_grammar():
     return """
 S -> A
 A -> B
-B -> C
+B -> b
+S -> C
 C -> D
-D -> 
-D -> x
+D -> D D
+S -> E
+E -> F
+F -> F F
+F -> f
+S -> K
+K -> K
+
     """.split('\n')
 
 def main():
@@ -222,10 +246,11 @@ def main():
         # print(g)
         g.rm_epses()
         print(g)
-        # g.rm_epses()
-        # print(g)
-        # g.rm_chains()
-        # print(g)
+        g.rm_chains()
+        print(g)
+        g.rm_unreach()
+        print('Final grammar:')
+        print(g)
 
 if __name__ == '__main__':
     main()
