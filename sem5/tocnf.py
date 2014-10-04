@@ -18,6 +18,14 @@ class Rule:
             return self.head == other.head and self.body == other.body
         return NotImplemented
 
+    # TODO
+    def __cmp__(self, other):
+        if isinstance(other, Rule):
+            self_key = self.head + ''.join(self.body)
+            other_key = other.head + ''.join(other.body)
+            return cmp(self_key, other_key)
+        return NotImplemented
+
     def __ne__(self, other):
         result = self.__eq__(other)
         if result is NotImplemented:
@@ -60,10 +68,15 @@ class Grammar:
         self.axiom = rules[0][0]
         self.rules = self.__mk_grammar(rules)
         self.__counter = 0
-        self.__rm_unheaded()
+        self.__filter_bad_rules()
+        self.eps = self.__is_gen_eps()
 
     def __repr__(self):
-        return '\n'.join(['Axiom: %s' % self.axiom] + [str(r) for r in self.rules])
+        e = ''
+        if self.eps:
+            e = str(Rule(self.axiom, []))
+        elif self.rules == []: return 'FAIL'
+        return '\n'.join(['Axiom: %s' % self.axiom] + [e] + [str(r) for r in self.rules])
 
     def __parse(self, lines):
         rules = []
@@ -82,7 +95,7 @@ class Grammar:
         self.__counter += 1
         return a + str(self.__counter)
 
-    def __gen_name(self):
+    def __gen_def_name(self):
         self.__counter += 1
         return 'T' + str(self.__counter)
 
@@ -153,8 +166,6 @@ class Grammar:
                     self.__rm_chain(r)
                     break
 
-    # def rm_nonprod(self):
-
     def __find_reachable(self, a):
         reachable = []
         for r in self.rules:
@@ -180,7 +191,7 @@ class Grammar:
                 new_body = []
                 for a in r.body:
                     if is_term(a):
-                        new_nonterm = self.__gen_name()
+                        new_nonterm = self.__gen_def_name()
                         new_rules.append(Rule(new_nonterm, a))
                         new_body.append(new_nonterm)
                     else:
@@ -196,7 +207,7 @@ class Grammar:
             if len(r.body) > 2:
                 one = r.body[0]
                 for two in r.body[1:-1]:
-                    new_nonterm = self.__gen_name()
+                    new_nonterm = self.__gen_def_name()
                     new_rules.append(Rule(new_nonterm, [one, two]))
                     one = new_nonterm
                 new_rules.append(Rule(r.head, [one, r.body[-1]]))
@@ -208,81 +219,67 @@ class Grammar:
         self.__mk_fake_nonterms()
         self.__reduce_body_len()
 
+    def rm_nonprod(self):
+        prods = []
+        found = True
+        while found:
+            found = False
+            for r in self.rules:
+                if not r.head in prods:
+                    if all(is_term(a) or a in prods for a in r.body):
+                        found = True
+                        prods.append(r.head)
+        self.rules = [r for r in self.rules if r.head in prods]
+        self.__filter_bad_rules()
 
-def rm_nonproductive(g):
-    found = True
-    prod = []
-    nonterms = list(set([r[0] for r in g]))
-    while found:
-        found = False
-        for nt in nonterms:
-            if not nt in prod:
-                bodies = [r[1] for r in g if r[0] == nt]
-                is_prod = True
-                for b in bodies:
-                    nts = [a for a in b if is_nonterm(a)]
-                    for a in nts:
-                        if not a in prod:
-                            is_prod = False
-                            break
-                    if not is_prod: break
-                if is_prod:
-                    prod.append(nt)
-                    found = True
-    nonprod = [a for a in nonterms if not a in prod]
-    filtered = []
-    for r in g:
-        if not r[0] in nonprod:
-            nts = [a for a in r[1] if is_nonterm(a)]
-            is_prod = True
-            for nt in nts:
-                if nt in nonprod:
-                    is_prod = False
-                    break
-            if is_prod: filtered.append(r)
-    return filtered
+    def __is_gen_eps(self):
+        epses = []
+        found = True
+        while found:
+            found = False
+            for r in self.rules:
+                if not r.head in epses:
+                    if all(is_nonterm(a) and a in epses for a in r.body):
+                        found = True
+                        epses.append(r.head)
+        return self.axiom in epses
 
-# def read_input(gfile):
-#     with open(gfile, 'r') as f:
-#         return f.readlines()
+    def sort_rules(self):
+        axiom_rules = [r for r in self.rules if r.head == self.axiom]
+        other_rules = [r for r in self.rules if r.head != self.axiom]
+        self.rules = axiom_rules.sort() + other_rules.sort()
 
-# def translate_to_CNF(lines):
-#     g = parse(lines)
-#     g_eps = rm_epses(g) 
-#     g_chains = rm_chains(g_eps)
-#     g_nonprod = rm_nonproductive(g_chains)
-#     print_grammar('Source grammar:', g)
-#     print_grammar('Removed eps:', g_eps)
-#     print_grammar('Removed chains:', g_chains)
-#     print_grammar('Removed nonproductive:', g_nonprod)
+    def translate_to_CNF(self):
+        self.rm_epses()
+        self.rm_chains()
+        self.rm_unreach()
+        self.rm_nonprod()
+        self.clear_up()
+        self.sort_rules()
+
+def read_input(gfile):
+    with open(gfile, 'r') as f:
+        return f.readlines()
 
 def default_grammar():
     return """
-S -> A x B  y C z D
-A -> a
-B -> b
-C -> c
-D -> d
+S -> A A A
+A -> 0 A
+A -> 
+
     """.split('\n')
 
 def main():
     import sys
-    if len(sys.argv) > 1:
-        gfile = sys.argv[1]
-        # translate_to_CNF(read_input(gfile))        
+    if len(sys.argv) > 1: 
+        g = Grammar(read_input(sys.argv[1]))
     else: 
-        # translate_to_CNF(default_grammar())
         g = Grammar(default_grammar())
-        # print(g)
-        g.rm_epses()
-        print(g)
-        g.rm_chains()
-        print(g)
-        g.rm_unreach()
-        print(g)
-        g.clear_up()
-        print('Final grammar:')
-        print(g)
+    g.translate_to_CNF()
+    # print('Final grammar:')
+    # print(g)
+
+    print(g)
 
 if __name__ == '__main__':
     main()
