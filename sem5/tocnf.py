@@ -119,6 +119,9 @@ class Grammar:
         old_name = eps_rule.head
         new_name = self.__gen_name(eps_rule.head)
         if old_name == self.axiom: self.axiom = new_name
+
+        # Until it changes
+
         new_rules = []
         for r in rest_rules:
             if r.has_in_body(old_name):
@@ -137,6 +140,8 @@ class Grammar:
     def rm_epses(self):
         changed = True
         while changed:
+            print('RM epses iter')
+            print(self)
             changed = False
             for r in self.rules:
                 if r.is_eps():
@@ -247,14 +252,28 @@ class Grammar:
     def sort_rules(self):
         axiom_rules = [r for r in self.rules if r.head == self.axiom]
         other_rules = [r for r in self.rules if r.head != self.axiom]
-        self.rules = axiom_rules.sort() + other_rules.sort()
+        axiom_rules.sort()
+        other_rules.sort()
+        self.rules = axiom_rules + other_rules
 
     def translate_to_CNF(self):
+        print('Source grammar')
+        print(self)
         self.rm_epses()
+        print('Without eps')
+        print(self)
         self.rm_chains()
-        self.rm_unreach()
+        print('Without chains')
+        print(self)
         self.rm_nonprod()
+        print('Without nonproductive')
+        self.rm_unreach()
+        print(self)
+        print('Without unreachable')
+        print(self)
         self.clear_up()
+        print('After cleaning')
+        print(self)
         self.sort_rules()
 
 def read_input(gfile):
@@ -276,9 +295,7 @@ def main():
     else: 
         g = Grammar(default_grammar())
     g.translate_to_CNF()
-    # print('Final grammar:')
-    # print(g)
-
+    print('Final grammar:')
     print(g)
 
 if __name__ == '__main__':
