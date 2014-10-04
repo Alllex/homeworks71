@@ -18,7 +18,6 @@ class Rule:
             return self.head == other.head and self.body == other.body
         return NotImplemented
 
-    # TODO
     def __cmp__(self, other):
         if isinstance(other, Rule):
             self_key = self.head + ''.join(self.body)
@@ -32,15 +31,7 @@ class Rule:
             return result
         return not result
 
-    # def __repr__(self):
-    #     def mk_line(b): return '{0} -> {1}'.format(self.head, ' '.join(b))
-    #     return '\n'.join([mk_line(b) for b in self.bodies])
-
-    # def __repr__(self):
-    #     return '{0} -> {1}'.format(self.head, ' |'.join(map(lambda b: ' '.join(b), self.bodies)))
-
     def __repr__(self): return '{0} -> {1}'.format(self.head, ' '.join(self.body))
-        # return '{0} -> {1}'.format(self.head, self.body)
 
     def __hash__(self):
         return hash(str([self.head] + self.body))
@@ -52,9 +43,6 @@ class Rule:
     def has_in_body(self, a): return a in self.body
 
     def reachable(self): return list(set([a for a in self.body if is_nonterm(a) and a != self.head]))
-
-    # def append(self, body):
-    #     Rule(self.head, self.bodies.append(body))
 
     def rename(self, old, new):
         if self.head == old: self.head = new
@@ -69,14 +57,15 @@ class Grammar:
         self.rules = self.__mk_grammar(rules)
         self.__counter = 0
         self.__filter_bad_rules()
-        self.eps = self.__is_gen_eps()
+        self.eps = False
+        self.sort_rules()
 
     def __repr__(self):
-        e = ''
+        e = []
         if self.eps:
-            e = str(Rule(self.axiom, []))
+            e = [str(Rule(self.axiom, []))]
         elif self.rules == []: return 'FAIL'
-        return '\n'.join(['Axiom: %s' % self.axiom] + [e] + [str(r) for r in self.rules])
+        return '\n'.join(['Axiom: %s' % self.axiom] + e + [str(r) for r in self.rules])
 
     def __parse(self, lines):
         rules = []
@@ -85,8 +74,6 @@ class Grammar:
             if [] == lexemes: continue
             rules.append((lexemes[0], lexemes[2:]))
         return rules
-
-    # def __get_nonterms(self): return list(set([r[0] for r in rules]))
 
     def __mk_grammar(self, rules):
         return map(lambda r: Rule(r[0], r[1]), rules)
@@ -117,20 +104,29 @@ class Grammar:
     def __rm_eps(self, eps_rule):
         rest_rules = (r for r in self.rules if r != eps_rule)
         old_name = eps_rule.head
-        new_name = self.__gen_name(eps_rule.head)
+        new_name = self.__gen_name(old_name)
         if old_name == self.axiom: self.axiom = new_name
-
-        # Until it changes
-
         new_rules = []
         for r in rest_rules:
             if r.has_in_body(old_name):
-                for i in xrange(len(r.body)):
-                    if r.body[i] == old_name:
-                        left = r.body[:i]
-                        right = r.body[(i+1):]
-                        new_rules.append(Rule(r.head, left + [new_name] + right))
-                        new_rules.append(Rule(r.head, left + right))
+                from_one = [r]
+                changed = True
+                while changed:
+                    changed = False
+                    tmp = []
+                    for rr in from_one:
+                        if rr.has_in_body(old_name):
+                            changed = True
+                            for i in xrange(len(rr.body)):
+                                if rr.body[i] == old_name:
+                                    left = rr.body[:i]
+                                    right = rr.body[(i+1):]
+                                    tmp.append(Rule(r.head, left + [new_name] + right))
+                                    tmp.append(Rule(r.head, left + right))
+                                    break
+                        else: tmp.append(rr)
+                    from_one = tmp
+                new_rules += from_one
             else:
                 new_rules.append(r)
         for r in new_rules: r.rename(old_name, new_name)
@@ -140,8 +136,8 @@ class Grammar:
     def rm_epses(self):
         changed = True
         while changed:
-            print('RM epses iter')
-            print(self)
+            # print('RM epses iter')
+            # print(self)
             changed = False
             for r in self.rules:
                 if r.is_eps():
@@ -257,23 +253,24 @@ class Grammar:
         self.rules = axiom_rules + other_rules
 
     def translate_to_CNF(self):
-        print('Source grammar')
-        print(self)
+        #print('Source grammar')
+        #print(self)
+        self.eps = self.__is_gen_eps()
         self.rm_epses()
-        print('Without eps')
-        print(self)
+        #print('Without eps')
+        #print(self)
         self.rm_chains()
-        print('Without chains')
-        print(self)
+        #print('Without chains')
+        #print(self)
         self.rm_nonprod()
-        print('Without nonproductive')
+        #print('Without nonproductive')
         self.rm_unreach()
-        print(self)
-        print('Without unreachable')
-        print(self)
+        #print(self)
+        #print('Without unreachable')
+        #print(self)
         self.clear_up()
-        print('After cleaning')
-        print(self)
+        #print('After cleaning')
+        #print(self)
         self.sort_rules()
 
 def read_input(gfile):
@@ -294,8 +291,11 @@ def main():
         g = Grammar(read_input(sys.argv[1]))
     else: 
         g = Grammar(default_grammar())
+    print('Source grammar:')
+    print(g)
     g.translate_to_CNF()
-    print('Final grammar:')
+    print('---' * 10)
+    print('CNF form:')
     print(g)
 
 if __name__ == '__main__':
