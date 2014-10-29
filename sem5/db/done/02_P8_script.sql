@@ -111,17 +111,62 @@ INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (7, 'Oxford', 3)
 INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (8, 'Berlin', 4)
 INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (9, 'Paris', 5)
 INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (10, 'Hong-Kong', 6)
-INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (11, 'Tokio', 7)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (11, 'Tokyo', 7)
 INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (12, 'New Deli', 8)
+
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (13, 'Saratov', 1)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (14, 'Omsk', 1)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (15, 'Perm', 1)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (16, 'Ufa', 1)
+
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (17, 'Bristol', 3)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (18, 'Liverpool', 3)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (19, 'Manchester', 3)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (20, 'Newcastle', 3)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (21, 'Nottingham', 3)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (22, 'Sheffield', 3)
+
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (24, 'Los Angeles', 2)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (25, 'Houston', 2)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (26, 'Philadelphia', 2)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (27, 'Phoenix', 2)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (28, 'Dallas', 2)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (29, 'Detroit', 2)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (30, 'Las Vegas', 2)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (31, 'Orlando', 2)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (32, 'Buffalo', 2)
+INSERT INTO P8_City(City_ID, Name, Country_ID) VALUES (33, 'Salt Lake City', 2)
+
 
 INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES
 	(1, 'Museum', 'Art Institute of Chicago', 4, 2, 'one.com', 5)
 INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES
-	(2, 'Museum', 'National Museum of Anthropology', 9, 4, 'two.com', 5)
+	(2, 'Museum', 'National Museum of Anthropology', 9, 4, 'two.com', 4)
 INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES
 	(3, 'Museum', 'Hermitage', 2, 1, NULL, 5)
 INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES
-	(4, 'Theater', 'London Theatre', 6, 2, 'three.com', 4)
+	(4, 'Theatre', 'London Theatre', 6, 2, 'three.com', 4)
+	
+INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES 
+	(5, 'Road', 'Route 66', 24, 2, 'route66.com', 2)
+INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES 
+	(6, 'Academy', 'Pennsylvania Academy of the Fine Arts', 26, 2, 'pafa.com', 4)
+INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES 
+	(7, 'Building', 'Freedom Tower', 3, 2, NULL, 3)
+INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES 
+	(8, 'Building', 'White house', 5, 2, 'wh.gov', 5)
+INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES 
+	(9, 'Cimena', 'Kreuzberg', 8, 3, NULL, 4)
+INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES 
+	(10, 'Cinema', 'Gaumont', 9, 4, 'gaumont.fr', 3)
+INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES 
+	(11, 'Theatre', 'Moscow Art Theatre', 1, 1, 'mat.ru', 5)
+INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES 
+	(12, 'Theatre', 'Ostankino Palace', 1, 1, 'op.ru', 4)
+INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES 
+	(13, 'Theatre', 'HKRep Blackbox', 10, 5, 'hkrep.hk', 3)
+INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES 
+	(14, 'Theatre', 'Adventure Stage Chicago', 4, 2, 'adventure.ch', 4)
 	
 INSERT INTO P8_Pond(Pond_ID, Type, Name, City_ID, Area, Width, Length) VALUES
 	(1, 'Lake', 'Baikal', 1, 100, 50, 2)
