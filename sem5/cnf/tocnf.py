@@ -52,20 +52,23 @@ class Grammar:
 
     def __init__(self, lines):
         rules = self.__parse(lines)
-        if len(rules) == 0: raise Exception('Empty grammar!')
-        self.axiom = rules[0][0]
-        self.rules = self.__mk_grammar(rules)
-        self.__counter = 0
-        self.__filter_bad_rules()
+        # if len(rules) == 0: raise Exception('Empty grammar!')
+        self.rules = []
         self.eps = False
-        self.sort_rules()
+        if len(rules) > 0:
+            self.axiom = rules[0][0]
+            self.rules = self.__mk_grammar(rules)
+            self.__counter = 0
+            self.__filter_bad_rules()
+            self.eps = False
+            self.sort_rules()
 
     def __repr__(self):
         e = []
         if self.eps:
             e = [str(Rule(self.axiom, []))]
         elif self.rules == []: return 'FAIL'
-        return '\n'.join(['Axiom: %s' % self.axiom] + e + [str(r) for r in self.rules])
+        return '\n'.join(e + [str(r) for r in self.rules])
 
     def __parse(self, lines):
         rules = []
@@ -135,14 +138,16 @@ class Grammar:
 
     def rm_epses(self):
         changed = True
+        deleted = []
         while changed:
             # print('RM epses iter')
             # print(self)
             changed = False
             for r in self.rules:
-                if r.is_eps():
+                if r.is_eps() and not r.head in deleted:
                     changed = True
                     self.__rm_eps(r)
+                    deleted.append(r.head)
                     break
 
     def __rm_chain(self, chain_rule):
@@ -253,24 +258,23 @@ class Grammar:
         self.rules = axiom_rules + other_rules
 
     def translate_to_CNF(self):
-        #print('Source grammar')
-        #print(self)
+        if self.rules == []: return
         self.eps = self.__is_gen_eps()
         self.rm_epses()
-        #print('Without eps')
-        #print(self)
+        # print('Without eps')
+        # print(self)
         self.rm_chains()
-        #print('Without chains')
-        #print(self)
+        # print('Without chains')
+        # print(self)
         self.rm_nonprod()
-        #print('Without nonproductive')
+        # print('Without nonproductive')
         self.rm_unreach()
-        #print(self)
-        #print('Without unreachable')
-        #print(self)
+        # print(self)
+        # print('Without unreachable')
+        # print(self)
         self.clear_up()
-        #print('After cleaning')
-        #print(self)
+        # print('After cleaning')
+        # print(self)
         self.sort_rules()
 
 def read_input(gfile):
@@ -291,11 +295,11 @@ def main():
         g = Grammar(read_input(sys.argv[1]))
     else: 
         g = Grammar(default_grammar())
-    print('Source grammar:')
-    print(g)
+    # print('Source grammar:')
+    # print(g)
     g.translate_to_CNF()
-    print('---' * 10)
-    print('CNF form:')
+    # print('---' * 10)
+    # print('CNF form:')
     print(g)
 
 if __name__ == '__main__':
