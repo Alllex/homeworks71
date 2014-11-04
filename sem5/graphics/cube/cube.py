@@ -4,7 +4,7 @@ from OpenGL.GLU import *
 
 W = 500
 SIDE = W / 2
-DISTANCE = 0
+DISTANCE = 300
 (LEFT, RIGHT) = (-SIDE / 2, SIDE / 2)
 (BOTTOM, TOP) = (-SIDE / 2, SIDE / 2)
 (FAR, NEAR)   = (-SIDE / 2, SIDE / 2)
@@ -52,7 +52,7 @@ def draw_sides():
     glVertex3f(LEFT, TOP, FAR)
     glVertex3f(LEFT, TOP, NEAR)
 
-    glColor3f(0.7, 0.7, 0.3) # FAR side
+    glColor3f(0.7, 0.7, 0.5) # FAR side
     glVertex3f(RIGHT, BOTTOM, FAR)
     glVertex3f(RIGHT, TOP, FAR)
     glVertex3f(LEFT, TOP, FAR)
@@ -74,9 +74,9 @@ def draw_scene():
     glMatrixMode(GL_PROJECTION)
 
     if   VIEW_NUMBER == VIEW_ORTHO:  load_ortho()
-    elif VIEW_NUMBER == VIEW_FOCUS1: load_persp(45)
-    elif VIEW_NUMBER == VIEW_FOCUS2: load_persp(60)
-    elif VIEW_NUMBER == VIEW_FOCUS3: load_persp(75)
+    elif VIEW_NUMBER == VIEW_FOCUS1: load_persp(30)
+    elif VIEW_NUMBER == VIEW_FOCUS2: load_persp(45)
+    elif VIEW_NUMBER == VIEW_FOCUS3: load_persp(60)
     else: 
         print 'Invalid view', VIEW_NUMBER
         sys.exit()
