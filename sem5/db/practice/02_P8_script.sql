@@ -166,7 +166,7 @@ INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website
 INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES 
 	(13, 'Theatre', 'HKRep Blackbox', 10, 5, 'hkrep.hk', 3)
 INSERT INTO P8_Showplace(Showplace_ID, Type, Name, City_ID, Language_ID, Website, Rating) VALUES 
-	(14, 'Theatre', 'Adventure Stage Chicago', 4, 2, 'adventure.ch', 4)
+	(14, 'Theatre', 'Adventure Stage Chicago', 4, 2, 'adventure.ch', 5)
 	
 INSERT INTO P8_Pond(Pond_ID, Type, Name, City_ID, Area, Width, Length) VALUES
 	(1, 'Lake', 'Baikal', 1, 100, 50, 2)
@@ -185,10 +185,11 @@ INSERT INTO P8_Pond(Pond_ID, Type, Name, City_ID, Area, Width, Length) VALUES
 -- Удаление таблиц 
 ---------------------------------------------------------------
 
+/*
 DROP TABLE P8_Pond;
 DROP TABLE P8_Showplace;
 DROP TABLE P8_City;
 DROP TABLE P8_Country;
 DROP TABLE P8_Language;
-
+*/
 
