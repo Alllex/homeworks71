@@ -12,17 +12,12 @@ type SS = Set.Set String
 type FF = Map.Map String SS
 type Symbol = String
 type Symbols = [Symbol]
-type ParsingTable = Map.Map String (Maybe Rule) 
+type ParsingTable = Map.Map String Rule
 
 
 newtype SetShow = SetShow SS
 newtype FFShow = FFShow FF
 newtype PTShow = PTShow ParsingTable
-
---putList 
-
---instance Show Rule where
---    show (R hd tl) = 
 
 instance Show SetShow where
     show (SetShow s) = "{ " ++ inner (Set.toList s) ++ " }"
@@ -34,7 +29,7 @@ instance Show FFShow where
 
 instance Show PTShow where
     show (PTShow pt) = "Parsing Table: " ++ foldl (\a (k, v) -> concat [a, "\n(", k, ") -> ", show v]) "" lst
-        where lst = [(pair, w) | (pair, v) <- (Map.toList pt), v /= Nothing, let (Just w) = v]
+        where lst = [(pair, v) | (pair, v) <- (Map.toList pt)]
 
 sUni = Set.union
 sEmp = Set.empty
@@ -42,9 +37,11 @@ sMem = Set.member
 sSin = Set.singleton
 sDel = Set.delete
 sLst x = Set.fromList x
+sInt = Set.intersection
 mIns k v m = Map.insert k v m
 mEmp = Map.empty
 mLst = Map.fromList
+mLoo = Map.lookup
 (!) = (Map.!)
 
 fktrace s f x = trace (s ++ show (f x)) x
@@ -55,7 +52,6 @@ mkRule (hd:_:body) = R hd body
 mkRule _ = error "FAIL"
 
 isTerm :: String -> Bool
---isTerm "" = error "Epses is not allowed"
 isTerm (c:_) = not $ isUpper c
 isTerm _ = False
 
@@ -126,21 +122,18 @@ mkFollows gr@(G g@((R st _):_)) ff = upd start where
         next = foldl (\acc (R hd tl) -> fromProd acc hd tl) flws woEpses
 
 mkParseTable :: Grammar -> ParsingTable
-mkParseTable g@(G rs) = foldl fromRule empt rs where
+mkParseTable g@(G rs) = foldl fromRule mEmp rs where
     nts = nonterms g
     ts = terms g ++ [endmarker]
-    empt = mLst [(mkKey nt t, Nothing) | nt <- nts, t <- ts]  -- foldl (\m nt -> foldl (\m' t -> mIns (nt, t) Nothing m') m ts) mEmp nts
     fs = mkFirsts g
-    --fs = fktrace "fs: " FFShow fs'
     fl = mkFollows g fs 
-    --fl = fktrace "fl: " FFShow fl'
     fromRule :: ParsingTable -> Rule -> ParsingTable
     fromRule m r@(R a alpha) = newTable where
         trms = Set.filter isTerm
         tsInFstAlpha = firstSeq fs alpha
         tsInFlwA = trms $ fl ! a
         maySkip = sMem eps tsInFstAlpha
-        upd = Set.fold (\t pt -> mIns (mkKey a t) (Just r) pt)
+        upd = Set.fold (\t pt -> mIns (mkKey a t) r pt)
         m' = upd m $ trms tsInFstAlpha
         m'' = if not maySkip then m' else upd m' tsInFlwA
         newTable = m''
@@ -148,45 +141,58 @@ mkParseTable g@(G rs) = foldl fromRule empt rs where
 
 parse :: Grammar -> Symbols -> IO ()
 parse g input = pp (input ++ [endmarker]) [axiom g, endmarker] where
-    pt' = mkParseTable g
-    pt = fktrace "" PTShow pt'
-    m x a = (!) pt $ mkKey x a
+    pt = mkParseTable g
+    m x a = mLoo (mkKey x a) pt
     getHead Nothing = error "Cannot get head of Nothing"
     getHead (Just (R hd _)) = hd
-    pp [e] _
-        | e == endmarker =
-            putStrLn "{END}"
+    pp [e] [e']
+        | e == endmarker && e == e' = return ()
         | otherwise = error "Illegal last stack symbol" 
     pp w@(a:next) (x:st)
         | a == x = do
-            putStrLn $ "match " ++ a
+            putStr $ a ++ " "
             pp next st
         | isTerm x = error $ "Incorrect input terminal: " ++ a
-        | m x a == Nothing = error $ "There is no such rule in parsing table m" ++ show (x, a)
+        | m x a == Nothing = putStrLn "FAIL"
         | x == (getHead $ m x a) = do
                 let mr = m x a
                 case mr of
-                    Nothing -> error "Illegal state"
-                    Just r@(R _ tl) -> do
-                        putStrLn $ show r
+                    Nothing -> error "Illegal state of parsing table"
+                    Just r@(R hd tl) -> do
+                        putStr $ hd ++ " "
                         if isEpsRule r then pp w st
                         else pp w $ tl ++ st 
         | otherwise = error "Unknown error"
     pp _ _ = error "Unknown error: Inconsistent state of stack and input"
 
+checkGrammar :: Grammar -> Bool
+checkGrammar g@(G rs) = all id $ map checkNonterm $ nonterms g where
+    prods s = [tl | (R hd tl) <- rs, hd == s]
+    fs = mkFirsts g
+    fl = mkFollows g fs 
+    checkNonterm a = all id $ map ok $ mkPairs ps where
+        ps = prods a
+        flwA = fl ! a
+        mkPairs xs = fltr [(x, y) | x <- xs, y <- xs, x /= y] where
+            fltr (p@(a, b):xs) = if (elem p xs) || (elem (b, a) xs) then fltr xs else p:fltr xs
+            fltr [] = []
+        ok (a, b) = ab && (not epsInBeta || aA) && (not epsInAlpha || bA) where
+            fa = firstSeq fs a
+            fb = firstSeq fs b
+            ab = fa `sInt` fb == sEmp
+            epsInAlpha = sMem eps fa
+            epsInBeta  = sMem eps fb
+            aA = fa `sInt` flwA == sEmp
+            bA = fb `sInt` flwA == sEmp
+
+
 main' grammarText inputText = do
     let rules = map words (filter (""/=) $ lines grammarText)
     let g = G $ map mkRule rules
     let input = words inputText
-    --putStrLn $ "Symbols:" ++ (show $ syms g)
-    --let firsts = mkFirsts g
-    --let follows = mkFollows g firsts
-    --putStrLn $ "Grammar: " ++ show g
-    --putStrLn $ "FIRSTS: " ++ (show (FFShow firsts))
-    --putStrLn $ "FOLLOWS: " ++ (show (FFShow follows))
-    --let pt = mkParseTable g
-    --putStrLn $ show (PTShow pt)
-    parse g input
+    let isLL1 = checkGrammar g
+    if isLL1 then parse g input
+    else putStr "FAIL"
 
 
 local_grammar = "\
@@ -201,6 +207,8 @@ local_grammar = "\
 
 local_input = "id + id * id"
 
+local_input2 = "( id + id ) * ( id + id * id ) + id * ( id + id ) + id"
+
 local_grammar2 = "\
 \   S -> i E t S S'       \n\
 \   S -> a    \n\
@@ -210,6 +218,20 @@ local_grammar2 = "\
 
 stupid = "S -> "
 
+local_grammar3 = "\
+\   S -> E       \n\
+\   S -> E a      \n\
+\   E -> b      \n\
+\   E ->         "
+
+local_grammar4 = "\
+\   S -> A      \n\
+\   S -> B    \n\
+\   A -> a A b          \n\
+\   A ->              \n\
+\   B -> a B b b              \n\
+\   B ->           "
+
 main = do
     args <- getArgs
     case args of
@@ -217,4 +239,4 @@ main = do
             f <- readFile fileName
             main' f []
         _ -> do
-            main' local_grammar local_input
+            main' local_grammar4 local_input2
