@@ -108,7 +108,7 @@ class Grammar:
         rest_rules = (r for r in self.rules if r != eps_rule)
         old_name = eps_rule.head
         new_name = self.__gen_name(old_name)
-        if old_name == self.axiom: self.axiom = new_name
+        # if old_name == self.axiom: self.axiom = new_name
         new_rules = []
         for r in rest_rules:
             if r.has_in_body(old_name):
@@ -133,6 +133,7 @@ class Grammar:
             else:
                 new_rules.append(r)
         for r in new_rules: r.rename(old_name, new_name)
+        for r in new_rules: r.rename(new_name, old_name)
         self.rules = new_rules
         self.__filter_bad_rules()
 
@@ -261,33 +262,15 @@ class Grammar:
         if self.rules == []: return
         self.eps = self.__is_gen_eps()
         self.rm_epses()
-        # print('Without eps')
-        # print(self)
         self.rm_chains()
-        # print('Without chains')
-        # print(self)
         self.rm_nonprod()
-        # print('Without nonproductive')
         self.rm_unreach()
-        # print(self)
-        # print('Without unreachable')
-        # print(self)
         self.clear_up()
-        # print('After cleaning')
-        # print(self)
         self.sort_rules()
 
 def read_input(gfile):
     with open(gfile, 'r') as f:
         return f.readlines()
-
-def default_grammar():
-    return """
-S -> A A A
-A -> 0 A
-A -> 
-
-    """.split('\n')
 
 def main():
     import sys
@@ -295,11 +278,7 @@ def main():
         g = Grammar(read_input(sys.argv[1]))
     else: 
         g = Grammar(default_grammar())
-    # print('Source grammar:')
-    # print(g)
     g.translate_to_CNF()
-    # print('---' * 10)
-    # print('CNF form:')
     print(g)
 
 if __name__ == '__main__':
