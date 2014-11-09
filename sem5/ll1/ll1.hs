@@ -147,23 +147,23 @@ parse g input = pp (input ++ [endmarker]) [axiom g, endmarker] where
     getHead (Just (R hd _)) = hd
     pp [e] [e']
         | e == endmarker && e == e' = return ()
-        | otherwise = putStrLn "FAIL7" -- error "Illegal last stack symbol" 
+        | otherwise = putStrLn "FAIL" -- error "Illegal last stack symbol" 
     pp w@(a:next) (x:st)
         | a == x = do
             putStr $ a ++ " "
             pp next st
-        | isTerm x = putStrLn "FAIL6" -- error $ "Incorrect input terminal: " ++ a
-        | m x a == Nothing = putStrLn "FAIL5"
+        | isTerm x = putStrLn "FAIL" -- error $ "Incorrect input terminal: " ++ a
+        | m x a == Nothing = putStrLn "FAIL"
         | x == (getHead $ m x a) = do
                 let mr = m x a
                 case mr of
-                    Nothing -> putStrLn "FAIL4" -- error "Illegal state of parsing table"
+                    Nothing -> putStrLn "FAIL" -- error "Illegal state of parsing table"
                     Just r@(R hd tl) -> do
                         putStr $ hd ++ " "
                         if isEpsRule r then pp w st
                         else pp w $ tl ++ st 
-        | otherwise = putStrLn "FAIL3" -- error "Unknown error"
-    pp _ _ = putStrLn "FAIL2" -- error "Unknown error: Inconsistent state of stack and input"
+        | otherwise = putStrLn "FAIL" -- error "Unknown error"
+    pp _ _ = putStrLn "FAIL" -- error "Unknown error: Inconsistent state of stack and input"
 
 checkGrammar :: Grammar -> Bool
 checkGrammar g@(G rs) = all id $ map checkNonterm $ nonterms g where
@@ -192,7 +192,7 @@ main' grammarText inputText = do
     let input = words inputText
     let isLL1 = checkGrammar g
     if isLL1 then parse g input
-    else putStr "FAIL1"
+    else putStr "FAIL"
 
 main = do
     args <- getArgs
