@@ -4,7 +4,7 @@ import Data.Char
 import qualified Data.List as List
 import qualified Data.Set  as Set
 import qualified Data.Map  as Map
-import Debug.Trace
+--import Debug.Trace
 
 data Rule = R String [String] deriving (Show, Eq)
 data Grammar = G [Rule] deriving (Show, Eq) 
@@ -44,7 +44,7 @@ mLst = Map.fromList
 mLoo = Map.lookup
 (!) = (Map.!)
 
-fktrace s f x = trace (s ++ show (f x)) x
+--fktrace s f x = trace (s ++ show (f x)) x
 
 mkRule :: Symbols -> Rule
 mkRule [hd, _] = R hd [""]
@@ -147,23 +147,23 @@ parse g input = pp (input ++ [endmarker]) [axiom g, endmarker] where
     getHead (Just (R hd _)) = hd
     pp [e] [e']
         | e == endmarker && e == e' = return ()
-        | otherwise = error "Illegal last stack symbol" 
+        | otherwise = putStrLn "FAIL7" -- error "Illegal last stack symbol" 
     pp w@(a:next) (x:st)
         | a == x = do
             putStr $ a ++ " "
             pp next st
-        | isTerm x = error $ "Incorrect input terminal: " ++ a
-        | m x a == Nothing = putStrLn "FAIL"
+        | isTerm x = putStrLn "FAIL6" -- error $ "Incorrect input terminal: " ++ a
+        | m x a == Nothing = putStrLn "FAIL5"
         | x == (getHead $ m x a) = do
                 let mr = m x a
                 case mr of
-                    Nothing -> error "Illegal state of parsing table"
+                    Nothing -> putStrLn "FAIL4" -- error "Illegal state of parsing table"
                     Just r@(R hd tl) -> do
                         putStr $ hd ++ " "
                         if isEpsRule r then pp w st
                         else pp w $ tl ++ st 
-        | otherwise = error "Unknown error"
-    pp _ _ = error "Unknown error: Inconsistent state of stack and input"
+        | otherwise = putStrLn "FAIL3" -- error "Unknown error"
+    pp _ _ = putStrLn "FAIL2" -- error "Unknown error: Inconsistent state of stack and input"
 
 checkGrammar :: Grammar -> Bool
 checkGrammar g@(G rs) = all id $ map checkNonterm $ nonterms g where
@@ -192,45 +192,7 @@ main' grammarText inputText = do
     let input = words inputText
     let isLL1 = checkGrammar g
     if isLL1 then parse g input
-    else putStr "FAIL"
-
-
-local_grammar = "\
-\   E -> T E'       \n\
-\   E' -> + T E'    \n\
-\   E' ->           \n\
-\   T -> F T'            \n\
-\   T' -> * F T'             \n\
-\   T' ->            \n\
-\   F -> ( E )           \n\
-\   F -> id            "
-
-local_input = "id + id * id"
-
-local_input2 = "( id + id ) * ( id + id * id ) + id * ( id + id ) + id"
-
-local_grammar2 = "\
-\   S -> i E t S S'       \n\
-\   S -> a    \n\
-\   S' -> e S          \n\
-\   S' ->             \n\
-\   E -> b            "
-
-stupid = "S -> "
-
-local_grammar3 = "\
-\   S -> E       \n\
-\   S -> E a      \n\
-\   E -> b      \n\
-\   E ->         "
-
-local_grammar4 = "\
-\   S -> A      \n\
-\   S -> B    \n\
-\   A -> a A b          \n\
-\   A ->              \n\
-\   B -> a B b b              \n\
-\   B ->           "
+    else putStr "FAIL1"
 
 main = do
     args <- getArgs
@@ -239,4 +201,5 @@ main = do
             f <- readFile fileName
             main' f []
         _ -> do
-            main' local_grammar4 local_input2
+            f <- readFile "in"
+            main' f []
