@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{1E781591-ACF9-4857-98A7-D0F207723884}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>sip</RootNamespace>
+    <AssemblyName>sip</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <PlatformTarget>x86</PlatformTarget>
+    <Externalconsole>true</Externalconsole>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <PlatformTarget>x86</PlatformTarget>
+    <Externalconsole>true</Externalconsole>
+    <Tailcalls>true</Tailcalls>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="FSharp.Core">
+      <HintPath>lib\fscore.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph">
+      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph.Serialization">
+      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Serialization.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph.Data">
+      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="QuickGraph.Graphviz">
+      <HintPath>..\packages\QuickGraph.3.6.61119.7\lib\net4\QuickGraph.Graphviz.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+</Project>
