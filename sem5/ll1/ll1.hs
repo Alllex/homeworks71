@@ -185,11 +185,20 @@ checkGrammar g@(G rs) = all id $ map checkNonterm $ nonterms g where
             aA = fa `sInt` flwA == sEmp
             bA = fb `sInt` flwA == sEmp
 
+lexer :: String -> [String]
+lexer inputText = lx inputText where
+    lx [] = []
+    lx ('\\':'\\':cs) = "\\\\" : lx cs
+    lx ('\\':' ':cs) = "\\ " : lx cs
+    lx ('\\':'n':cs) = "\\n" : lx cs
+    lx "\\" = ["\\ "] -- error "Incorrect input: found lonely backslash \'\\\'"
+    lx (c:cs) | elem c " \n\t\r" = lx cs
+              | otherwise = [c] : lx cs
 
 main' grammarText inputText = do
-    let rules = map words (filter (""/=) $ lines grammarText)
+    let rules = map words $ filter (""/=) $ lines grammarText
     let g = G $ map mkRule rules
-    let input = words inputText
+    let input = lexer inputText
     let isLL1 = checkGrammar g
     if isLL1 then parse g input
     else putStr "FAIL"
