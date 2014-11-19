@@ -197,9 +197,8 @@ main' grammarText inputText = do
 main = do
     args <- getArgs
     case args of
-        [fileName] -> do
-            f <- readFile fileName
-            main' f []
-        _ -> do
-            f <- readFile "in"
-            main' f []
+        [grammarFile, inputFile] -> do
+            grammarText <- readFile grammarFile
+            inputText <- readFile inputFile
+            main' grammarText inputText
+        _ -> putStrLn "Wrong parameters count.\nUsage: $ runhaskell {grammar file name} {input file name}"
