@@ -146,7 +146,7 @@ parse g input = pp (input ++ [endmarker]) [axiom g, endmarker] where
     getHead Nothing = error "Cannot get head of Nothing"
     getHead (Just (R hd _)) = hd
     pp [e] [e']
-        | e == endmarker && e == e' = return ()
+        | e == endmarker && e == e' = putStr "OK"
         | otherwise = putStrLn "FAIL" -- error "Illegal last stack symbol" 
     pp w@(a:next) (x:st)
         | a == x = do
