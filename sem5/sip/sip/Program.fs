@@ -151,16 +151,15 @@ let mkWeightedGraph (q : Graph) (g : Graph) =
 let lightestEdges (qw : WeightedGraph) =
     if Seq.length qw.Edges = 1 then qw.Edges
     else
-        let lightestEdge = Seq.minBy (fun (e: WeightedEdge) -> e.Weight) qw.Edges
+        let lightestEdge = qw.Edges |> Seq.minBy (fun e -> e.Weight)
         qw.Edges
-        |> Seq.filter (fun (e : WeightedEdge) -> e.Weight = lightestEdge.Weight)
+        |> Seq.filter (fun e -> e.Weight = lightestEdge.Weight)
        
 
 let selectFirstEdge (p : WeightedEdge seq) (qw : WeightedGraph) =
     if (Seq.length p > 1) then
         
-        let degree (v : WeightedVertex) =
-            Seq.length <| qw.AdjacentEdges v
+        let degree (v : WeightedVertex) = Seq.length <| qw.AdjacentEdges v
         let sumDegree (e : WeightedEdge) =
             let e' = e :> IWeightedEdge
             degree e'.Source + degree e'.Target
@@ -184,13 +183,28 @@ let selectFirstEdge (p : WeightedEdge seq) (qw : WeightedGraph) =
 let indGCount (qw : WeightedGraph) (vs : SpanVerticies) =
     let indG = qw.Edges |> Seq.filter (fun e -> Set.contains e.Source vs && Set.contains e.Target vs)
     Seq.length indG
+    
+    
+let ininfo (vt : SpanVerticies) (e : WeightedEdge) =
+    let invt v = Set.contains v vt
+    (invt e.Source, invt e.Target)
 
+
+let outerVertex (vt : SpanVerticies) (e : WeightedEdge) = 
+    let (srcin, tgtin) = ininfo vt e
+    if srcin && tgtin then failwith "Both verticies are inside the set"
+    else if not srcin && not tgtin then failwith "Verticies set doesn't contain any verticies of edge"
+    else if srcin then e.Target
+    else e.Source
+
+let addNewVertex (vt : SpanVerticies) (e : WeightedEdge) =
+    Set.add (outerVertex vt e) vt
 
 let selectSpanningEdge (p : WeightedEdge seq) (qw : WeightedGraph) (vt : SpanVerticies) =
     let p1 = 
         if Seq.length p = 1 then p
         else
-            let ind (e : WeightedEdge) = indGCount qw (Set.add e.Target vt)
+            let ind (e : WeightedEdge) = indGCount qw (addNewVertex vt e)
             let sample = qw.Edges |> Seq.maxBy ind
             let sampleValue = ind sample
             qw.Edges
@@ -199,7 +213,8 @@ let selectSpanningEdge (p : WeightedEdge seq) (qw : WeightedGraph) (vt : SpanVer
         if Seq.length p1 = 1 then p1
         else
             let degree (e : WeightedEdge) =
-                Seq.length <| qw.AdjacentEdges e.Target
+                let out = outerVertex vt e
+                Seq.length <| qw.AdjacentEdges out
             let sample = qw.Edges |> Seq.minBy degree
             let sampleValue = degree sample
             qw.Edges
@@ -209,13 +224,15 @@ let selectSpanningEdge (p : WeightedEdge seq) (qw : WeightedGraph) (vt : SpanVer
 let front (qw : WeightedGraph) (vt : SpanVerticies) =
     qw.Edges
     |> Seq.filter (fun e ->
-                      Set.contains e.Source vt && not (Set.contains e.Target vt) // doesn't process undirectiness
+                        let (srcin, tgtin) = ininfo vt e
+                        srcin <> tgtin
                   )
                   
 let inner (qw : WeightedGraph) (vt : SpanVerticies) =
     qw.Edges
     |> Seq.filter (fun e ->
-                      Set.contains e.Source vt && Set.contains e.Target vt
+                      let (srcin, tgtin) = ininfo vt e
+                      srcin && tgtin
                   )
 
 let minimumSpanningTree (qw : WeightedGraph) = 
@@ -232,14 +249,14 @@ let minimumSpanningTree (qw : WeightedGraph) =
         p <- front qw vt
         e <- selectSpanningEdge p qw vt
         et <- Set.add e et
-        vt <- Set.add e.Target vt // doesn't check undirected
+        vt <- addNewVertex vt e
         seq <- E e :: seq
         qw.RemoveEdge e |> ignore
         let inn = inner qw vt |> Seq.sortBy (fun e -> e.Weight)
         for ee in inn do
             seq <- E ee :: seq
             qw.RemoveEdge ee |> ignore
-    (et , seq)
+    (et , List.rev seq)
     
 // ---------------------------------------------------------------------------------------------------------
 
