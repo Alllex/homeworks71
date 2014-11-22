@@ -30,14 +30,24 @@ type WeightedVertex(label : String, weight : int) = class
     override this.ToString() =
         this.ID.ToString() + "[" + label + "](" + weight.ToString() + ")"
         
+    override this.Equals obj = 
+        match obj with 
+        | :? WeightedVertex as other -> this.ID = other.ID
+        | _ -> false
+     
+    override this.GetHashCode() = this.ID ^^^ 31
+        
     interface IComparable<WeightedVertex> with
         member this.CompareTo (other : WeightedVertex) =
             this.ID.CompareTo other.ID
+            
     interface IComparable with
         member this.CompareTo obj =
             match obj with
             | :? WeightedVertex as other -> (this :> IComparable<_>).CompareTo other
             | _ -> invalidArg "obj" "not a WeightedVertext"
+            
+    
 end
 
 type IWeightedEdge = IEdge<WeightedVertex>
@@ -57,6 +67,13 @@ type WeightedEdge(source : WeightedVertex, target : WeightedVertex, weight : int
         let ie = this :> IEdge<WeightedVertex>
         ie.Source.ToString() + " --(" + weight.ToString() + ")-- " + ie.Target.ToString()
         
+    override this.Equals obj = 
+        match obj with 
+        | :? WeightedEdge as other -> this.Source.Equals(other.Source) && this.Target.Equals(other.Target)
+        | _ -> false
+     
+    override this.GetHashCode() = this.Source.GetHashCode() &&& this.Target.GetHashCode()
+                             
     interface IComparable<WeightedEdge> with
         member this.CompareTo (other : WeightedEdge) =
             let this' = this :> IWeightedEdge
@@ -79,7 +96,7 @@ type WeightedGraph = UndirectedGraph<WeightedVertex, WeightedEdge>
 type SpanVerticies = Set<WeightedVertex>
 type SpanEdges = Set<WeightedEdge>
 type GraphSeqElem = E of WeightedEdge
-type GraphSeq = GraphSeqElem seq
+type GraphSeq = GraphSeqElem list
 
 
 
@@ -138,14 +155,6 @@ let lightestEdges (qw : WeightedGraph) =
         qw.Edges
         |> Seq.filter (fun (e : WeightedEdge) -> e.Weight = lightestEdge.Weight)
        
-let indGCount (vs : SpanVerticies) (qw : WeightedGraph) =
-    let indG = Seq.filter (fun (e : WeightedEdge) -> 
-                        let src = e.Source
-                        let tgt = e.Target
-                        Set.contains src vs && Set.contains tgt vs
-                  )
-               <| qw.Edges
-    Seq.length indG
 
 let selectFirstEdge (p : WeightedEdge seq) (qw : WeightedGraph) =
     if (Seq.length p > 1) then
@@ -172,22 +181,67 @@ let selectFirstEdge (p : WeightedEdge seq) (qw : WeightedGraph) =
        Seq.head p
        
 
-(*
-let selectSpanningEdge (p : WeightedEdge seq) (qw : WeightedGraph) (vt : SpanVerticies) =
+let indGCount (qw : WeightedGraph) (vs : SpanVerticies) =
+    let indG = qw.Edges |> Seq.filter (fun e -> Set.contains e.Source vs && Set.contains e.Target vs)
+    Seq.length indG
 
+
+let selectSpanningEdge (p : WeightedEdge seq) (qw : WeightedGraph) (vt : SpanVerticies) =
+    let p1 = 
+        if Seq.length p = 1 then p
+        else
+            let ind (e : WeightedEdge) = indGCount qw (Set.add e.Target vt)
+            let sample = qw.Edges |> Seq.maxBy ind
+            let sampleValue = ind sample
+            qw.Edges
+            |> Seq.filter (fun e -> sampleValue = ind e)
+    let p2 = 
+        if Seq.length p1 = 1 then p1
+        else
+            let degree (e : WeightedEdge) =
+                Seq.length <| qw.AdjacentEdges e.Target
+            let sample = qw.Edges |> Seq.minBy degree
+            let sampleValue = degree sample
+            qw.Edges
+            |> Seq.filter (fun e -> sampleValue = degree e)
+    Seq.head p2
+
+let front (qw : WeightedGraph) (vt : SpanVerticies) =
+    qw.Edges
+    |> Seq.filter (fun e ->
+                      Set.contains e.Source vt && not (Set.contains e.Target vt) // doesn't process undirectiness
+                  )
+                  
+let inner (qw : WeightedGraph) (vt : SpanVerticies) =
+    qw.Edges
+    |> Seq.filter (fun e ->
+                      Set.contains e.Source vt && Set.contains e.Target vt
+                  )
 
 let minimumSpanningTree (qw : WeightedGraph) = 
+    let vs = Set.ofSeq qw.Vertices
     let mutable vt = Set.empty<WeightedVertex>
     let mutable et = Set.empty<WeightedEdge>
-    let mutable seq = Seq.empty<GraphSeqElem>
+    let mutable seq = []
     let mutable p = lightestEdges qw
+    let mutable e = selectFirstEdge p qw
+    et <- Set.add e et
+    vt <- Set.add e.Source vt
+    vt <- Set.add e.Target vt
+    while Set.difference vt vs <> Set.empty do
+        p <- front qw vt
+        e <- selectSpanningEdge p qw vt
+        et <- Set.add e et
+        vt <- Set.add e.Target vt // doesn't check undirected
+        seq <- E e :: seq
+        qw.RemoveEdge e |> ignore
+        let inn = inner qw vt |> Seq.sortBy (fun e -> e.Weight)
+        for ee in inn do
+            seq <- E ee :: seq
+            qw.RemoveEdge ee |> ignore
+    (et , seq)
     
-*)
-
-
-
-
-
+// ---------------------------------------------------------------------------------------------------------
 
 
 let print (s : String) = Console.WriteLine(s)
