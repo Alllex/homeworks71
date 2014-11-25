@@ -2,24 +2,19 @@ using System;
 
 namespace SIP
 {
-	class Vertex
+	public class Vertex
 	{
 		static int counter = 0;
 		int identifier = counter++;
-		int id;
-		String lbl;
-		int w;
 
-		public Vertex(int id, String lbl, int w)
+		public Vertex(int id, String lbl)
 		{
-			this.id = id;
-			this.lbl = lbl; 
-			this.w = w;
+			this.ID = id;
+			this.Label = lbl; 
 		}
 
-		public int ID { get { return id; } }
-		public String Label { get { return lbl; } }
-		public int Weight { get { return w; } }
+		public int ID { get; private set; }
+		public String Label { get; private set; }
 		
 		public int CompareTo(object obj)
 		{
@@ -39,7 +34,7 @@ namespace SIP
 
 		public override int GetHashCode()
 		{
-			return identifier ^ (Label.GetHashCode () & id.GetHashCode ()) ^ 37;
+			return identifier ^ (Label.GetHashCode () & ID.GetHashCode ()) ^ 37;
 		}
 	}
 }

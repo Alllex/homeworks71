@@ -8,18 +8,15 @@ namespace SIP
 
 		Vertex src;
 		Vertex tgt;
-		int w;
 
-		public Edge(Vertex src, Vertex tgt, int w)
+		public Edge(Vertex src, Vertex tgt)
 		{
 			this.src = src;
 			this.tgt = tgt;
-			this.w = w;
 		}	
 
 		public Vertex Source { get { return src; } }
 		public Vertex Target { get { return tgt; } }
-		public int Weight { get { return w; } }
 
 		public int CompareTo(object obj)
 		{
@@ -40,6 +37,14 @@ namespace SIP
 		public override int GetHashCode()
 		{
 			return this.Source.GetHashCode () ^ this.Target.GetHashCode ();
+		}
+
+		public static bool UndirectedEquals(IEdge<Vertex> e1, IEdge<Vertex> e2)
+		{
+			return (e1.Source.Label.Equals (e2.Source.Label) && 
+				e1.Target.Label.Equals (e2.Target.Label)) || 
+				(e1.Target.Label.Equals (e2.Source.Label) && 
+				e1.Source.Label.Equals (e2.Target.Label));
 		}
 
 	}

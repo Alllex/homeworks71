@@ -55,6 +55,8 @@
     <Compile Include="Vertex.cs" />
     <Compile Include="Edge.cs" />
     <Compile Include="SEQ.cs" />
+    <Compile Include="WeightedVertex.cs" />
+    <Compile Include="WeightedEdge.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
