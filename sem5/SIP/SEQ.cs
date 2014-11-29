@@ -19,9 +19,9 @@ namespace SIP
 			seq = new MinimumSpanningTreeBuilder (q, g).MakeSEQ ();
 		}
 
-		public Item GetItem(int index)
+		public List<Item> GetSEQ()
 		{
-			return seq[index];
+			return seq;
 		}
 
 		public class Item
@@ -36,6 +36,11 @@ namespace SIP
 			public Vertex Parent { get; private set; }
 			public Vertex Vertex { get; private set; }
 			public String Label { get; private set; }
+
+			public override string ToString ()
+			{
+				return string.Format ("[Item: Parent={0}, Vertex={1}, Label={2}]", Parent, Vertex, Label);
+			}
 		}
 
 		private class Builder
@@ -78,19 +83,23 @@ namespace SIP
 
 			public List<Item> MakeSEQ()
 			{
-				var vCount = qw.Vertices.Count ();
-				var vt = new HashSet<WeightedVertex> ();
+				var vCount = (from v in qw.Vertices select v.ID).Distinct ().Count ();
+				var vt = new HashSet<int> ();
 				var et = new HashSet<WeightedEdge> ();
 				var seq = new Builder ();
 				var p = lightestEdges (qw);
 				var e = selectFirstEdge (p.ToList (), qw);
 				et.Add (e);
-				vt.Add (e.Source); vt.Add (e.Target);
+				vt.Add (e.Source.ID); vt.Add (e.Target.ID);
+				seq.AddEdge (e);
+				qw.RemoveEdge (e);
 				while (vCount > vt.Count()) {
+					var tmp_vs = qw.Vertices.ToList ();
+					var tmp_es = qw.Edges.ToList ();
 					p = front (qw, vt);
 					e = selectSpanningEdge (p.ToList (), qw, vt);
 					et.Add (e);
-					vt.Add (outer (vt, e));
+					vt.Add ((outer (vt, e)).ID);
 					seq.AddEdge (e);
 					qw.RemoveEdge (e);
 					var inn = from ee in inner (qw, vt) orderby ee.Weight select ee;
@@ -161,26 +170,26 @@ namespace SIP
 				return p.First ();
 			}
 
-			static int indGCount(WeightedGraph q, ISet<WeightedVertex> vs)
+			static int indGCount(WeightedGraph q, HashSet<int> vs)
 			{
 				return q.Edges.Count ( e =>
-				    vs.Contains (e.Source) && vs.Contains (e.Target)
+				    vs.Contains (e.Source.ID) && vs.Contains (e.Target.ID)
 				);
 			}
 
-			static WeightedVertex outer(ISet<WeightedVertex> vs, WeightedEdge e)
+			static WeightedVertex outer(HashSet<int> vs, WeightedEdge e)
 			{
-				return (vs.Contains (e.Source)) ? e.Target : e.Source;
+				return (vs.Contains (e.Source.ID)) ? e.Target : e.Source;
 			}
 
-			static WeightedEdge selectSpanningEdge(IEnumerable<WeightedEdge> p, WeightedGraph q, HashSet<WeightedVertex> vs)
+			static WeightedEdge selectSpanningEdge(IEnumerable<WeightedEdge> p, WeightedGraph q, HashSet<int> vs)
 			{
 				if (p.Count () > 1) {
 					Func<WeightedEdge, int> ind = e => {
 						var o = outer (vs, e);
-						vs.Add (o);
+						vs.Add (o.ID);
 						var indg = indGCount (q, vs);
-						vs.Remove (o);
+						vs.Remove (o.ID);
 						return indg;
 					};
 					var maxIndG = q.Edges.Max (ind);
@@ -194,17 +203,24 @@ namespace SIP
 				return p.First ();
 			}
 		
-			static IEnumerable<WeightedEdge> front(WeightedGraph q, HashSet<WeightedVertex> vs)
+			static IEnumerable<WeightedEdge> front(WeightedGraph q, HashSet<int> vs)
 			{
-				return from e in q.Edges 
-				where (vs.Contains (e.Source) && !vs.Contains (e.Target)) ||
-						(!vs.Contains (e.Source) && vs.Contains (e.Target))
-				select e;
+				List<WeightedEdge> es = new List<WeightedEdge> ();
+				foreach (var e in q.Edges) {
+					var src = e.Source;
+					var tgt = e.Target;
+					var srcin = vs.Contains (src.ID);
+					var tgtin = vs.Contains (tgt.ID);
+					if (srcin ^ tgtin) {
+						es.Add (e);
+					}
+				}
+				return es;
 			}
 
-			static IEnumerable<WeightedEdge> inner(WeightedGraph q, HashSet<WeightedVertex> vs)
+			static IEnumerable<WeightedEdge> inner(WeightedGraph q, HashSet<int> vs)
 			{
-				return from e in q.Edges where vs.Contains (e.Source) && vs.Contains (e.Target) select e;
+				return from e in q.Edges where vs.Contains (e.Source.ID) && vs.Contains (e.Target.ID) select e;
 			}
 
 		}

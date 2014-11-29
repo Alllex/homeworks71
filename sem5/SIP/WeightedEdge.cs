@@ -15,6 +15,11 @@ namespace SIP
 		public int Weight { get; private set; }
 		new public WeightedVertex Source { get; private set; }
 		new public WeightedVertex Target { get; private set; }
+
+		public override string ToString ()
+		{
+			return string.Format ("[WE: W={0}, S={1}, T={2}]", Weight, Source, Target);
+		}
 	}
 }
 

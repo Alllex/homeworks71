@@ -11,6 +11,11 @@ namespace SIP
 		}
 
 		public int Weight { get; private set; }
+
+		public override string ToString ()
+		{
+			return string.Format ("[WV: ID={0}, L={1}, W={2}]", ID, Label, Weight);
+		}
 	}
 }
 

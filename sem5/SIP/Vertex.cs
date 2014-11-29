@@ -28,13 +28,18 @@ namespace SIP
 		{
 			if (obj == null) return false;
 			var other = obj as Vertex;
-			if (other != null) return this.identifier == other.identifier;
+			if (other != null) return this.ID == other.ID;
 			throw new ArgumentException ("Object is not an Vertex");
 		}
 
 		public override int GetHashCode()
 		{
 			return identifier ^ (Label.GetHashCode () & ID.GetHashCode ()) ^ 37;
+		}
+
+		public override string ToString ()
+		{
+			return string.Format ("[Vertex: ID={0}, Label={1}]", ID, Label);
 		}
 	}
 }

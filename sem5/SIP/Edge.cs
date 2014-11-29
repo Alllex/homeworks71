@@ -22,7 +22,7 @@ namespace SIP
 		{
 			if (obj == null) return 1;
 			var other = obj as Edge;
-			if (other != null) return this.Source == other.Source && this.Target == other.Target ? 0 : 1;
+			if (other != null) return this.Equals (other) ? 0 : 1;
 			throw new ArgumentException ("Object is not an Edge");
 		}
 
@@ -45,6 +45,11 @@ namespace SIP
 				e1.Target.Label.Equals (e2.Target.Label)) || 
 				(e1.Target.Label.Equals (e2.Source.Label) && 
 				e1.Source.Label.Equals (e2.Target.Label));
+		}
+
+		public override string ToString ()
+		{
+			return string.Format ("[Edge: Source={0}, Target={1}]", Source, Target);
 		}
 
 	}
