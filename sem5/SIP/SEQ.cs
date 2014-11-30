@@ -39,13 +39,13 @@ namespace SIP
 
 			public override string ToString ()
 			{
-				return string.Format ("[Item: Parent={0}, Vertex={1}, Label={2}]", Parent, Vertex, Label);
+				return string.Format ("[I: P={0}, V={1}, L={2}]", Parent, Vertex, Label);
 			}
 		}
 
 		private class Builder
 		{
-			HashSet<Vertex> vs = new HashSet<Vertex>();
+			HashSet<int> vs = new HashSet<int>();
 			List<Item> seq = new List<Item>();
 
 			public List<Item> MakeSEQ()
@@ -57,7 +57,7 @@ namespace SIP
 			{
 				Vertex inner = null;
 				Vertex outer = null;
-				if (vs.Contains (e.Source)) {
+				if (vs.Contains (e.Source.ID)) {
 					inner = e.Source;
 					outer = e.Target;
 				} else {
@@ -65,6 +65,15 @@ namespace SIP
 					outer = e.Source;
 				}
 				seq.Add(new Item(inner, outer, outer.Label));
+				vs.Add (outer.ID);
+			}
+
+			public void AddFirstEdge(Edge e)
+			{
+				vs.Add (e.Source.ID);
+				vs.Add (e.Target.ID);
+				seq.Add (new Item(null, e.Source, e.Source.Label));
+				seq.Add (new Item(e.Source, e.Target, e.Target.Label));
 			}
 		}
 
@@ -91,11 +100,9 @@ namespace SIP
 				var e = selectFirstEdge (p.ToList (), qw);
 				et.Add (e);
 				vt.Add (e.Source.ID); vt.Add (e.Target.ID);
-				seq.AddEdge (e);
+				seq.AddFirstEdge (e);
 				qw.RemoveEdge (e);
 				while (vCount > vt.Count()) {
-					var tmp_vs = qw.Vertices.ToList ();
-					var tmp_es = qw.Edges.ToList ();
 					p = front (qw, vt);
 					e = selectSpanningEdge (p.ToList (), qw, vt);
 					et.Add (e);
