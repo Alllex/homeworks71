@@ -220,14 +220,14 @@ namespace SIP
 			Console.WriteLine ("Hello World!");
 			//test3 ();
 
-			for (int vCount = 2; vCount < 25; vCount++) {
+			for (int vCount = 2; vCount < 31; vCount += 2) {
 				var count = 100;
 				var succ = 0;
 				var watch = Stopwatch.StartNew();
 				// the code that you want to measure comes here
 				for (int i = 0; i < count; i++) {
 					var q = RandomGraph.GenerateConnected (vCount, 75);
-					var g = RandomGraph.ExtendGraph (q, vCount, 50);
+					var g = RandomGraph.ExtendConnected (q, 4 * vCount, 50);
 					//printGraph (q);
 					//printGraph (g); 
 
@@ -240,6 +240,11 @@ namespace SIP
 				var secs = (float) watch.ElapsedMilliseconds / 1000;
 
 				using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"time.txt", true))
+				{
+					file.WriteLine(secs.ToString ());
+				}
+
+				using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"vcount.txt", true))
 				{
 					file.WriteLine(secs.ToString ());
 				}

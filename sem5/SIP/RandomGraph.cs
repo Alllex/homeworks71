@@ -100,6 +100,12 @@ namespace SIP
 			return MakeConnected (q);
 		}
 
+		public static Graph ExtendConnected(Graph q, int vCount, int ePercent)
+		{
+			var g = ExtendGraph (q, vCount, ePercent);
+			return MakeConnected (g);
+		}
+
 		static string rndLabel()
 		{
 			return alphabet[rnd.Next (alphabet.Length)].ToString();
