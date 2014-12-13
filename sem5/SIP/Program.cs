@@ -218,10 +218,16 @@ namespace SIP
 		public static void Main (string[] args)
 		{
 			Console.WriteLine ("Hello World!");
-			//test3 ();
+
+			test2 ();
+			test3 ();
+			test4 ();
+
+			using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"time.txt")) file.WriteLine("");
+			using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"vcount.txt")) file.WriteLine("");
 
 			for (int vCount = 2; vCount < 31; vCount += 2) {
-				var count = 100;
+				var count = 10;
 				var succ = 0;
 				var watch = Stopwatch.StartNew();
 				// the code that you want to measure comes here
@@ -241,18 +247,17 @@ namespace SIP
 
 				using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"time.txt", true))
 				{
-					file.WriteLine(secs.ToString ());
+					file.WriteLine(secs);
 				}
 
 				using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"vcount.txt", true))
 				{
-					file.WriteLine(secs.ToString ());
+					file.WriteLine(vCount);
 				}
 
-				print (secs.ToString ()); 
-				//print (vCount + " -> " + succ + "/" + count + "  --  " + secs + "s"); 
+				//print (secs.ToString ()); 
+				print (vCount + " -> " + succ + "/" + count + "  --  " + secs + "s"); 
 			}
-
 
 		}
 	}

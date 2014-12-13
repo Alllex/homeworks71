@@ -11,7 +11,6 @@ namespace SIP
 	public class QuickSI
 	{
 
-		Graph q;
 		Graph g; 
 		List<SEQ.Item> seq; 
 		int[] h; 
@@ -21,31 +20,29 @@ namespace SIP
 
 		public QuickSI (Graph q, Graph g)
 		{
-			this.q = q;
 			this.g = g;
 			this.alpha = g.VertexCount;
 			this.beta = q.VertexCount;
 			this.h = new int[beta];
 			this.f = new bool[alpha];
-			this.seq = new SEQ (q, g).GetSEQ ();
+			this.seq = SEQ.BuildSEQ (q, g);
 
-			this.Result = algorithm (1);
+			this.Result = algorithm (0);
 		}
 
 		public bool Result { get; private set; }
 
 		bool algorithm(int d)
 		{
-			if (d > beta) {
+			if (d >= beta) {
 				return true;
 			}
-			var t = seq [d - 1];
-			//var vs = (from v in g.Vertices
-			//	where v.Label == t.Label && !f[v.ID] && (d == 1 || gHasEdge(v.ID, h[t.Parent.ID]))
-			//	select v).ToList ();
+			var t = seq [d];
 			var vs = choose (d, t);
 			foreach (var v in vs) {
-				h [t.Vertex.ID] = v.ID;
+				if (degreeInG (v) < t.Degree ||
+				    !t.ExtraEdges.All (p => gHasEdge (v.ID, h [p]))) continue;
+				h [t.Vertex] = v.ID;
 				f [v.ID] = true;
 				if (algorithm (d + 1)) return true;
 				f [v.ID] = false;
@@ -55,10 +52,9 @@ namespace SIP
 
 		List<Vertex> choose(int d, SEQ.Item t)
 		{
-			var withLabels = (from v in g.Vertices where v.Label == t.Label select v).ToList ();
-			var freeVerts = (from v in withLabels where !f [v.ID] select v).ToList ();
-			if (d == 1) return freeVerts;
-			var withEdges = (from v in freeVerts where gHasEdge (v.ID, h [t.Parent.ID]) select v).ToList ();
+			var freeWithLabels = (from v in g.Vertices where !f [v.ID] && v.Label.Equals (t.Label) select v).ToList ();
+			if (d == 0) return freeWithLabels;
+			var withEdges = (from v in freeWithLabels where gHasEdge (v.ID, h [t.Parent]) select v).ToList ();
 			return withEdges;
 		}
 
@@ -72,6 +68,10 @@ namespace SIP
 				}
 			}
 			return false;
+		}
+
+		int degreeInG(Vertex v) {
+			return g.AdjacentEdges (v).Count ();
 		}
 
 	}

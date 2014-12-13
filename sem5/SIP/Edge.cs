@@ -46,10 +46,10 @@ namespace SIP
 				(e1.Target.Label.Equals (e2.Source.Label) && 
 				e1.Source.Label.Equals (e2.Target.Label));
 		}
-
+		
 		public override string ToString ()
 		{
-			return string.Format ("[Edge: Source={0}, Target={1}]", Source, Target);
+			return string.Format ("[{0} -> {1}]", Source, Target);
 		}
 
 	}

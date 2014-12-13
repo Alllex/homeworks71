@@ -18,7 +18,7 @@ namespace SIP
 
 		public override string ToString ()
 		{
-			return string.Format ("[WE: W={0}, S={1}, T={2}]", Weight, Source, Target);
+			return string.Format ("[{0} -> {1}]", Source, Target);
 		}
 	}
 }

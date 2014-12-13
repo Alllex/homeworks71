@@ -36,10 +36,10 @@ namespace SIP
 		{
 			return identifier ^ (Label.GetHashCode () & ID.GetHashCode ()) ^ 37;
 		}
-
+		
 		public override string ToString ()
 		{
-			return string.Format ("[Vertex: ID={0}, Label={1}]", ID, Label);
+			return string.Format ("{1}({0})", ID, Label);
 		}
 	}
 }
