@@ -57,6 +57,9 @@
     <Compile Include="SEQ.cs" />
     <Compile Include="WeightedVertex.cs" />
     <Compile Include="WeightedEdge.cs" />
+    <Compile Include="QuickSI.cs" />
+    <Compile Include="RandomGraph.cs" />
+    <Compile Include="UllmanSIP.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
