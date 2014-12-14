@@ -15,8 +15,6 @@ namespace SIP
 		Graph g; 
 		Vertex[] qvs;
 		Vertex[] gvs;
-		Edge[] qes;
-		Edge[] ges;
 		int[] h; 
 		bool[] f; 
 		int alpha;
@@ -28,8 +26,6 @@ namespace SIP
 			this.g = g;
 			this.qvs = q.Vertices.ToArray ();
 			this.gvs = g.Vertices.ToArray ();
-			this.qes = q.Edges.ToArray ();
-			this.ges = g.Edges.ToArray ();
 			this.alpha = g.VertexCount;
 			this.beta = q.VertexCount;
 			this.h = new int[beta];

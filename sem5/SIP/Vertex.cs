@@ -5,7 +5,7 @@ namespace SIP
 	public class Vertex
 	{
 		static int counter = 0;
-		int identifier = counter++;
+		protected int Identifier = counter++;
 
 		public Vertex(int id, String lbl)
 		{
@@ -34,7 +34,7 @@ namespace SIP
 
 		public override int GetHashCode()
 		{
-			return identifier ^ (Label.GetHashCode () & ID.GetHashCode ()) ^ 37;
+			return Identifier ^ (Label.GetHashCode () & ID.GetHashCode ()) ^ 37;
 		}
 		
 		public override string ToString ()

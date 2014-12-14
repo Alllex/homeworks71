@@ -28,7 +28,7 @@ namespace SIP
 			WeightedGraph qw = weightGraph (vft, eft, q);
 
 			// First step: find first candidates 
-			var vCount = (from v in qw.Vertices select v.ID).Distinct ().Count ();
+ 			var vCount = q.VertexCount;
 			var p = lightestEdges (qw);
 			var e = selectFirstEdge (p.ToList (), qw);
 
@@ -161,8 +161,9 @@ namespace SIP
 			return p.First ();
 		}
 
-		static int degree(Graph q, int v) {
-			return q.AdjacentEdges (q.Vertices.ElementAt(v)).Count ();
+		static int degree(Graph q, int vID) {
+			var vert = (from v in q.Vertices where v.ID == vID select v).First();
+			return q.AdjacentEdges (vert).Count ();
 		}
 
 		static IEnumerable<WeightedEdge> front(WeightedGraph q, HashSet<int> vs)

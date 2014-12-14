@@ -2,6 +2,9 @@ using System;
 using QuickGraph;
 using System.Diagnostics;
 
+using System.Linq;
+using System.Collections.Generic;
+
 namespace SIP
 {
 	using Graph = UndirectedGraph<Vertex, Edge>;
@@ -9,6 +12,132 @@ namespace SIP
 
 	class MainClass
 	{
+
+		class TestRun {
+
+			public TestRun(int runCount, Graph q, Graph g) {
+				run (runCount, q, g); 
+			}
+
+			public TestRun(Graph q, Graph g) : this (1, q, g) {}
+
+			void run(int runCount, Graph q, Graph g) {
+				long sumTimeQuick = 0;
+				long sumTimeUllman = 0;
+				var seq = SEQ.BuildSEQ (q, g);
+				Match = true;
+
+				for (int runNumber = 0; runNumber < runCount; runNumber++) {
+					var watch = Stopwatch.StartNew();
+					var resultQuick = new QuickSI (seq, g).Result;
+					watch.Stop();
+					var ms = watch.ElapsedMilliseconds;
+					sumTimeQuick += ms;
+
+					watch = Stopwatch.StartNew ();
+					var resultUllman = new UllmanSIP (q, g).Result;
+					watch.Stop ();
+					ms = watch.ElapsedMilliseconds;
+					sumTimeUllman += ms;
+
+					if (resultQuick ^ resultUllman)
+						Match = false;
+				}
+
+				var avgTimeQuick = sumTimeQuick / runCount;
+				var avgTimeUllman = sumTimeUllman / runCount;
+				TimeQuickSI = avgTimeQuick;
+				TimeUllman = avgTimeUllman;
+			}
+
+			public bool Match { get; set; }
+			public long TimeQuickSI { get; set; }
+			public long TimeUllman { get; set; }
+
+			public string ToString (int vCount)
+			{
+				return (!Match) ? 
+					(vCount + " : mismatch") : 
+					(vCount + " :\t\t" + TimeUllman + "\t\t" + TimeQuickSI); 
+			}
+		}
+
+		static void FixedDataTest(int amountOfSteps,
+		                          int dataVertexCount,
+		                          int dataEdgePercentage,
+		                          int startPatternSize,
+		                          int patternEdgePercantage,
+		                          int patternStepGrowth) {
+			var patternVertexCount = startPatternSize;
+			//var dataGraph = RandomGraph.GenerateGraph ()
+		}
+
+		static void FixedPatternTest(int amountOfSteps, 
+		                             int patternVertexCount, 
+		                             int patternEdgePercentage, 
+		                             int dataGraphStepGrowth) {
+			var vCountData = patternVertexCount;
+			var q = RandomGraph.GenerateGraph (patternVertexCount, patternEdgePercentage);
+			for (int step = 0; step < amountOfSteps; step++) {
+				var extend = ((vCountData * dataGraphStepGrowth) / 100);
+				var g = RandomGraph.ExtendGraph (q, extend, 30);
+				var test = new TestRun (5, q, g);
+				vCountData += extend;
+				print (test.ToString (vCountData)); 
+			}
+		}
+
+		public static void Main (string[] args)
+		{
+			for (int patternSize = 4; patternSize <= 20; patternSize+=2) {
+				//print ("Pattern size = " + patternSize);
+				FixedPatternTest (10, 8, 50, 10);
+			}
+
+			//var q = RandomGraph.OneVertexGraph ();
+			/*
+			var g1 = RandomGraph.ExtendGraph (q, 4, 0);
+			var g2 = RandomGraph.ExtendGraph (q, 4, 100);
+			var g3 = RandomGraph.ExtendGraph (q, 4, 40);
+			printGraph (q);
+			printGraph (g1);
+			printGraph (g2);
+			printGraph (g3);
+			*/
+
+			/*
+			for (int vertexCount = 5; vertexCount <= 100; vertexCount += 5) {
+				int vCount = vertexCount;
+				print ("-----------\t" + vCount + "\t------------");
+				for (int p = 0; p <= 100; p += 10) {
+					int sumEdgesCount = 0;
+					int percent = p;
+					int testCount = 100;
+					int expectedCount = vCount * (vCount - 1) * percent / 200;
+					for (int i = 0; i < testCount; i++) {
+						var g = RandomGraph.ExtendGraph (q, vCount - 1, percent);
+						int eCount = g.EdgeCount;
+						sumEdgesCount += eCount;
+					}
+					int avgEdgeCount = sumEdgesCount / testCount;
+					print (percent + "% : " + expectedCount + " vs. " + avgEdgeCount); 
+				}
+			}
+			*/
+			/*
+			using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"time.txt")) file.WriteLine("");
+			using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"vcount.txt")) file.WriteLine("");
+			using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"time.txt", true))
+			{
+				file.WriteLine(ms);
+			}
+			using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"vcount.txt", true))
+			{
+				file.WriteLine(vCount);
+			}
+			*/
+			//print (vCount + " -> " + succ + "/" + count + "  --  " + avgTime + "ms");
+		}
 
 		static void print(String s) {
 			Console.WriteLine (s);
@@ -74,7 +203,7 @@ namespace SIP
 			g.AddVertexRange (gvs);
 			g.AddEdgeRange (ges);
 
-			print (new QuickSI (q, g).Result.ToString ()); 
+			print (new UllmanSIP (q, g).Result.ToString ()); 
 
 			//var seq = new SEQ (q, g);
 			//var lst = seq.GetSEQ ();
@@ -137,7 +266,7 @@ namespace SIP
 			g.AddVertexRange (gvs);
 			g.AddEdgeRange (ges);
 			
-			print (new QuickSI (q, g).Result.ToString ()); 
+			print (new UllmanSIP (q, g).Result.ToString ()); 
 			/*
 			var seq = new SEQ (q, g);
 			var lst = seq.GetSEQ ();
@@ -204,7 +333,7 @@ namespace SIP
 			g.AddVertexRange (gvs);
 			g.AddEdgeRange (ges);
 			
-			print (new QuickSI (q, g).Result.ToString ()); 
+			print (new UllmanSIP (q, g).Result.ToString ()); 
 
 			/*
 			var seq = new SEQ (q, g);
@@ -215,51 +344,6 @@ namespace SIP
 			}*/
 		}
 
-		public static void Main (string[] args)
-		{
-			Console.WriteLine ("Hello World!");
-
-			test2 ();
-			test3 ();
-			test4 ();
-
-			using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"time.txt")) file.WriteLine("");
-			using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"vcount.txt")) file.WriteLine("");
-
-			for (int vCount = 2; vCount < 31; vCount += 2) {
-				var count = 10;
-				var succ = 0;
-				var watch = Stopwatch.StartNew();
-				// the code that you want to measure comes here
-				for (int i = 0; i < count; i++) {
-					var q = RandomGraph.GenerateConnected (vCount, 75);
-					var g = RandomGraph.ExtendConnected (q, 4 * vCount, 50);
-					//printGraph (q);
-					//printGraph (g); 
-
-					var result = new QuickSI (q, g).Result; 
-					if (result)
-						succ++;
-				}
-
-				watch.Stop();
-				var secs = (float) watch.ElapsedMilliseconds / 1000;
-
-				using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"time.txt", true))
-				{
-					file.WriteLine(secs);
-				}
-
-				using (System.IO.StreamWriter file = new System.IO.StreamWriter(@"vcount.txt", true))
-				{
-					file.WriteLine(vCount);
-				}
-
-				//print (secs.ToString ()); 
-				print (vCount + " -> " + succ + "/" + count + "  --  " + secs + "s"); 
-			}
-
-		}
 	}
 }
 

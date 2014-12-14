@@ -13,102 +13,68 @@ namespace SIP
 		static Random rnd = new Random();
 		static string alphabet = "ABCDEFGHIJKLMNOPRSTUVWXYZ";
 
+		public static Graph OneVertexGraph() {
+			var q = new Graph (false);
+			q.AddVertex (new Vertex(0, rndLabel ()));
+			return q;
+		}
+
 		public static Graph GenerateGraph(int vCount, int ePercent)
 		{
-			Vertex[] vs = new Vertex[vCount];
-			for (int i = 0; i < vCount; i++) {
-				vs[i] = new Vertex(i, rndLabel ());
-			}
-			List<Edge> es = new List<Edge> ();
-			for (int i = 0; i < vCount; i++) {
-				for (int j = i + 1; j < vCount; j++) {
-					if (rnd.Next (100) < ePercent) {
-						es.Add (new Edge(vs[i], vs[j]));
-					}
-				}
-			}
-			var q = new Graph (false);
-			q.AddVertexRange (vs);
-			q.AddEdgeRange (es);
-			return q;
+			return ExtendGraph (OneVertexGraph (), vCount - 1, ePercent);
 		}
 
 		public static Graph ExtendGraph(Graph q, int vCount, int ePercent)
 		{
 			var oldVc = q.VertexCount;
-			var newVc = oldVc + vCount;
 
-			Vertex[] vs = new Vertex[newVc];
 			Vertex[] qvs = q.Vertices.ToArray();
 
-			for (int i = 0; i < newVc; i++) {
-				vs [i] = i < oldVc ? qvs [i] : new Vertex (i, rndLabel ());
-			}
-
-			bool[,] adjMatrix = new bool[newVc, newVc];
-			foreach (var e in q.Edges) {
-				var i = Math.Min (e.Source.ID, e.Target.ID);
-				var j = Math.Max (e.Source.ID, e.Target.ID);
-				adjMatrix [i, j] = true;
-			}
-			
+			Vertex[] gvsArr = new Vertex[vCount];
+			List<Vertex> vs = new List<Vertex> ();
+			vs.AddRange (q.Vertices);
 			List<Edge> es = new List<Edge> ();
-			for (int i = 0; i < newVc; i++) {
-				for (int j = i + 1; j < newVc; j++) {
+			es.AddRange (q.Edges);
+
+			for (int i = 0; i < vCount; i++) {
+				var nv = new Vertex (i + oldVc, rndLabel ());
+				gvsArr [i] = nv;
+				vs.Add (nv);
+				var connected = false;
+				for (int j = 0; j < oldVc + i; j++) {
 					if (rnd.Next (100) < ePercent) {
-						adjMatrix [i, j] = true;
+						es.Add (new Edge ((j < oldVc) ? qvs [j] : gvsArr[j - oldVc], nv));
+						connected = true;
 					}
-					if (adjMatrix [i, j]) {
-						es.Add (new Edge(vs[i], vs[j]));
-					}
+				}
+				if (!connected) {
+					int vIndex = rnd.Next (oldVc + i);
+					es.Add (new Edge((vIndex < oldVc) ? qvs[vIndex] : gvsArr[vIndex - oldVc], nv));
 				}
 			}
 
 			var g = new Graph (false);
-			g.AddVertexRange (vs);
-			g.AddEdgeRange (es);
+			g.AddVertexRange (shuffle(vs));
+			g.AddEdgeRange (shuffle(es));
 			return g;
-		}
-
-		public static Graph MakeConnected(Graph q)
-		{
-			Vertex[] qvs = q.Vertices.ToArray();
-			var g = new Graph (false);
-			g.AddVertexRange (q.Vertices);
-			g.AddEdgeRange (q.Edges);
-
-			for (int i = 1; i < q.VertexCount; i++) {
-				var found = false;
-				foreach (var e in q.Edges) {
-					if (e.Source.ID == i - 1 && e.Target.ID == i ||
-					    e.Target.ID == i - 1 && e.Source.ID == i) {
-						found = true;
-						break;
-					}
-				}
-				if (!found) {
-					g.AddEdge (new Edge(qvs[i - 1], qvs[i]));
-				}
-			}
-
-			return g;
-		}
-
-		public static Graph GenerateConnected(int vCount, int ePercent)
-		{
-			var q = GenerateGraph (vCount, ePercent);
-			return MakeConnected (q);
-		}
-
-		public static Graph ExtendConnected(Graph q, int vCount, int ePercent)
-		{
-			var g = ExtendGraph (q, vCount, ePercent);
-			return MakeConnected (g);
 		}
 
 		static string rndLabel()
 		{
 			return alphabet[rnd.Next (alphabet.Length)].ToString();
+		}
+
+		static IEnumerable<T> shuffle<T>(IEnumerable<T> list) {
+			var count = list.Count ();
+			var arr = list.ToArray ();
+			for (int i = 0; i < 10 * count; i++) {
+				var i1 = rnd.Next (count);
+				var i2 = rnd.Next (count);
+				var e = arr [i1];
+				arr [i1] = arr [i2];
+				arr [i2] = e;
+			}
+			return arr;
 		}
 	}
 }

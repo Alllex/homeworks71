@@ -12,21 +12,24 @@ namespace SIP
 	{
 
 		Graph g; 
+		Vertex[] gvs;
 		List<SEQ.Item> seq; 
+		List<int>[] adj;
 		int[] h; 
 		bool[] f; 
 		int alpha;
 		int beta;
 
-		public QuickSI (Graph q, Graph g)
+		public QuickSI (List<SEQ.Item> seq, Graph g)
 		{
 			this.g = g;
+			this.gvs = g.Vertices.ToArray ();
 			this.alpha = g.VertexCount;
-			this.beta = q.VertexCount;
+			this.beta = seq.Count;
 			this.h = new int[beta];
 			this.f = new bool[alpha];
-			this.seq = SEQ.BuildSEQ (q, g);
-
+			this.seq = seq;
+			this.adj = mkAdjacencyLists (alpha, g.Edges);
 			this.Result = algorithm (0);
 		}
 
@@ -38,10 +41,13 @@ namespace SIP
 				return true;
 			}
 			var t = seq [d];
-			var vs = choose (d, t);
-			foreach (var v in vs) {
-				if (degreeInG (v) < t.Degree ||
-				    !t.ExtraEdges.All (p => gHasEdge (v.ID, h [p]))) continue;
+
+			for (int vNum = 0; vNum < alpha; vNum++) {
+				var v = gvs [vNum];
+				if (f [v.ID] || !v.Label.Equals (t.Label)) continue;
+				if (d != 0 && !gHasEdge (v.ID, h [t.Parent])) continue;
+				if (degreeInG (v) < t.Degree) continue;
+				if (!t.ExtraEdges.All (p => gHasEdge (v.ID, h [p]))) continue;
 				h [t.Vertex] = v.ID;
 				f [v.ID] = true;
 				if (algorithm (d + 1)) return true;
@@ -50,28 +56,27 @@ namespace SIP
 			return false;
 		}
 
-		List<Vertex> choose(int d, SEQ.Item t)
-		{
-			var freeWithLabels = (from v in g.Vertices where !f [v.ID] && v.Label.Equals (t.Label) select v).ToList ();
-			if (d == 0) return freeWithLabels;
-			var withEdges = (from v in freeWithLabels where gHasEdge (v.ID, h [t.Parent]) select v).ToList ();
-			return withEdges;
-		}
-
 		bool gHasEdge(int vID, int pID)
 		{
-			foreach (var e in g.Edges) {
-				var src = e.Source.ID;
-				var tgt = e.Target.ID;
-				if (src == vID && tgt == pID || src == pID && tgt == vID) {
-					return true;
-				}
-			}
-			return false;
+			return (adj [vID].Count < adj [pID].Count) ?
+				adj [vID].Contains (pID) :
+				adj [pID].Contains (vID);
 		}
 
 		int degreeInG(Vertex v) {
-			return g.AdjacentEdges (v).Count ();
+			return adj[v.ID].Count();
+		}
+
+		static List<int>[] mkAdjacencyLists(int vCount, IEnumerable<Edge> edges) {
+			var table = new List <int>[vCount];
+			for (int i = 0; i < vCount; i++) {
+				table [i] = new List<int> ();
+			}
+			foreach (var e in edges) {
+				table [e.Source.ID].Add (e.Target.ID);
+				table [e.Target.ID].Add (e.Source.ID);
+			}
+			return table;
 		}
 
 	}
