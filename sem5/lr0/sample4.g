@@ -1,3 +1,3 @@
 A -> T #
 T -> a T b
-T -> c
+T -> a b

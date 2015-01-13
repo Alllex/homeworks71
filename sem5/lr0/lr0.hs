@@ -54,7 +54,8 @@ goto g sits x = closure g moved where
     moved = foldr (\s acc -> case move s of Nothing -> acc; Just a -> a:acc) [] sits
 
 mkGraph :: Grammar -> DotGraph
-mkGraph g@(G ((R i hd tl):_)) = mkg [] [] [closure g [S i hd [] tl]] where
+mkGraph g@(G rs@((R _ ax _):_)) = mkg [] [] [fstClosure] where
+    fstClosure = nub $ concat [closure g [S i hd [] tl] | (R i hd tl) <- rs, ax == hd]
     syms' = syms g
     mkg :: [State] -> [(Int, Int, Symbol)] -> [State] -> DotGraph
     mkg nodes edges [] = DG nodes edges
@@ -93,7 +94,7 @@ printGraph dg@(DG ns es) = do
     let text =  "digraph G {\n\trankdir=LR;\n" ++
                 concat (map showNode $ zip [1..] ns) ++ "\n" ++
                 concat (map (\(i, j, sym) -> showEdge (i + 1) (j + 1) sym) es) ++ "\n}"
-    putStr text
+    putStrLn text
 
 -----------------------------------------------------------------------------
 
@@ -108,9 +109,9 @@ main = do
         [grammarFile] -> do
             grammarText <- readFile grammarFile
             main' grammarText
-        _ -> do
-            let grammarFile = "session.g"
-            grammarText <- readFile grammarFile
-            main' grammarText
+        --_ -> do
+        --    let grammarFile = "session.g"
+        --    grammarText <- readFile grammarFile
+        --    main' grammarText
 
-        --_ -> putStrLn "Wrong parameters count.\nUsage: $ runhaskell {this file name} {grammar file name}"
+        _ -> putStrLn "Wrong parameters count.\nUsage: $ runhaskell {this file name} {grammar file name}"
