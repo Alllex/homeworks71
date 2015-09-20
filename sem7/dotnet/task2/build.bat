@@ -1,0 +1,19 @@
+@ECHO OFF
+
+SET CSC="%WINDIR%\Microsoft.NET\Framework\v4.0.30319\csc.exe"
+SET CLASS_NAME=SmartCalc
+SET SOURSE_NAME=%CLASS_NAME%.cs
+SET EXEC_NAME=%CLASS_NAME%.exe
+
+%CSC% %SOURSE_NAME%
+
+IF ERRORLEVEL 1 GOTO :FAIL
+
+%EXEC_NAME%
+GOTO :EOF
+
+:FAIL
+ECHO Build has failed...
+
+
+
