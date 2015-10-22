@@ -1,0 +1,9 @@
+Collaborative filtering with 10 nearest neighbors
+Learning on the full user-set
+Global maximal listen-count 329
+User fav-vectors created... 0:00:08.810533
+User neigbours found... 0:31:10.900374
+46941 tests done
+NMAE = 0.00702666997246
+NRMSE = 0.0148554543479
+Done... 0:31:11.559577
