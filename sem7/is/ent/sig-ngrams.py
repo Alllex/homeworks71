@@ -5,6 +5,7 @@ from __future__ import division
 
 import time
 import codecs
+import numpy as np
 
 ENCODING = 'utf-8'
 
@@ -15,13 +16,15 @@ def dt2str(dt):
 
 last_progress = -1
 start_time = time.time()
-def print_progress(cur, all):
+def print_progress(cur, all, percent=20, force=False):
     global last_progress, start_time
     progress = int(cur * 100 / all)
-    if progress != last_progress and progress % 20 == 0:
+    if force or (progress != last_progress and progress % percent == 0):
         last_progress = progress
         dt = time.time() - start_time
         print '{:>3}% processed... [{}]'.format(progress, dt2str(dt))
+        return True
+    return False
 
 def read_content(content_file_path, lines_to_read=-1):
     ru_lines = []
@@ -45,82 +48,204 @@ def read_content(content_file_path, lines_to_read=-1):
 
     return ru_lines
 
-def group_words(lines):
-    abc = set(list(u"абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"))
-    ws = set([' ', '\t', '-'])
+def split_into_sentences(lines, stopword_file, max_sentence_length=30):
+    import Stemmer
+    abc = set(u"абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ")
+    word_seps = set(" \t-%")
+    sentence_seps = set(".!?")
 
+    stemmer = Stemmer.Stemmer(u'russian')
+
+    stopwords = set()
+    with codecs.open(stopword_file, encoding=ENCODING) as swf:
+        for stopword in swf:
+            stopwords.add(stemmer.stemWord(stopword[:-1].lower())) 
+
+    stem2num_dict = {}
+    num2stem_dict = {}
+    stem_count_dict = {}
+    stem_counter = 0
+
+    sentences = []
     groups = []
-    group = []
+    stems = []
 
     line_count = 0
     all_line_count = len(lines)
 
-    print 'Grouping words...'
+    print 'Splitting text into sentences...'
     for line in lines:
-        is_ws, is_sep = False, False
         st, i = -1, 0
+        got_word = False
 
         for c in line:
-            if c in abc:
+            if c in abc: # got letter
                 if st < 0:
                     st = i
-                is_ws, is_sep = False, False
-            elif c in ws:
-                if st >= 0:
-                    group.append(line[st:i].lower())
-                is_ws, is_sep, st = True, False, -1
+            elif st >= 0: # got word
+                stemmed = stemmer.stemWord(line[st:i].lower())
                 st = -1
-            else: # got separator
-                if st >= 0:
-                    group.append(line[st:i].lower())
-                if len(group) > 0:
-                    groups.append(group)
-                    group = []
-                is_ws, is_sep, st = False, True, -1
+                if stemmed not in stopwords:
+                    stem_num = 0
+                    if stemmed in stem2num_dict:
+                        stem_num = stem2num_dict[stemmed]
+                        stem_count_dict[stem_num] += 1
+                    else:
+                        stem_counter += 1
+                        stem_num = stem_counter
+                        stem2num_dict[stemmed] = stem_num
+                        num2stem_dict[stem_num] = stemmed
+                        stem_count_dict[stem_num] = 1
+
+                    stems.append(stem_num)
+
+                    if c not in word_seps:
+                        groups.append(stems)
+                        stems = []
+                        if c in sentence_seps:
+                            sentences.append(groups)
+                            groups = []
+                else:
+                    if len(groups) > 0:
+                        sentences.append(groups)
+                        groups = []
+
+            elif c in sentence_seps:
+                if len(groups) > 0:
+                    sentences.append(groups)
+                    groups = []
+            elif c not in word_seps:
+                if len(stems) > 0:
+                    groups.append(stems)
+                    stems = []
 
             i += 1
 
-        if len(group) > 0:
-            groups.append(group)
+        if len(stems) > 0:
+            groups.append(stems)
+            stems = []
+        if len(groups) > 0:
+            sentences.append(groups)
+            groups = []
+
+        if len(stems) > 0 or len(groups) > 0:
+            print 'stems', stems
+            print 'groups', groups
 
         line_count += 1
         print_progress(line_count, all_line_count)
 
     print all_line_count, 'lines processed in total.\n'
+    print 'Sentences collected:   {}'.format(len(sentences))
+    print 'Unique stem collected: {}'.format(stem_counter)
+
+    min_len = 2
+    max_len = max_sentence_length
+    ss = []
+    thrown = 0
+    for s in sentences:
+        sl = sum([len(g) for g in s])
+        if sl >= min_len and sl <= max_len:
+            ss.append(s)
+        else:
+            thrown += 1
+
+    print 'Sentences in length limit:   {}'.format(len(sentences) - thrown)
+    print '' 
+
+    return num2stem_dict, stem_count_dict, ss
+
+def gen_basis(dim, basis_size=16):
+    print 'Generating basis...[basis size={}, dim={}]\n'.format(basis_size, dim)
+    return np.random.random_integers(-1, 1, (basis_size, dim))
+
+def rnd_proj(sentence, basis, basis_size):
+    lsh = 0
+    for bit in xrange(basis_size):
+        dot = sum([basis[bit][st_num] for g in sentence for st_num in g])
+        bitval = -1 if dot < 0 else 1
+        lsh <<= 1
+        if bitval > 0:
+            lsh |= 1
+    return lsh
+
+def dedup_with_cosine(sentences, threshold):
+    from math import sqrt
+
+    bags = []
+    filtered_sentences = [] # of indexes
+
+    for sentence in sentences:
+        st_nums2 = set([st_num for g in sentence for st_num in g])
+        d2 = len(st_nums2)
+
+        is_dup = False
+        for d1, st_nums1 in bags:
+            dot = len(st_nums1 & st_nums2)
+            cosine = dot / sqrt(d1 * d2)
+            if cosine >= threshold:
+                is_dup = True
+                break
+
+        if not is_dup:
+            bags.append((d2, st_nums2))
+            filtered_sentences.append(sentence)
+
+    return filtered_sentences
+
+def dedup_with_basis(sentences, basis, basis_size, threshold):
+    from multiprocessing import Pool
+    from functools import partial
+
+    sentences_count = len(sentences)
+    progress_counter, progerss_goal = 0, sentences_count
+
+    buckets = {}
+
+    print 'Hashing sentences and splitting into buckets... [basis size = {}]'.format(basis_size)
+    for i in xrange(sentences_count):
+        snt = sentences[i]
+        lsh = rnd_proj(snt, basis, basis_size)
+        if lsh in buckets:
+            buckets[lsh].append(snt)
+        else:
+            buckets[lsh] = [snt]
+        progress_counter += 1
+        print_progress(progress_counter, progerss_goal, 20)
+
+    print '{} sentences processed in total.\n'.format(sentences_count)
+
+    filtered_sentences = []
+
+    progress_counter, progerss_goal = 0, len(buckets)
+    print 'Deduplicating sentences... [cosine with threshold = {}]'.format(threshold)
+
+    cpu_cnt = 4
+    pool = Pool(cpu_cnt)
+    rs = [ pool.apply_async(dedup_with_cosine, (snts, threshold)) for lsh, snts in buckets.iteritems() ]
+
+    pool.close()
+    pool.join()
+    filtered_sentences = [snt for r in rs for snt in r.get()]
+
+    initial_count = sentences_count
+    filtered_count = len(filtered_sentences)
+    thrown = initial_count - filtered_count
+    filtered_percent = int((100 * thrown) / initial_count)
+
+    print '{}% filtered, {}/{} sentences left.\n'.format(filtered_percent, filtered_count, initial_count)
+
+    return filtered_sentences
+
+def dedup_sentences(sentences, dim, basis_size=16, threshold=0.9):
+    basis = gen_basis(dim, basis_size)
+    return dedup_with_basis(sentences, basis, basis_size, threshold);
+
+def sentences_to_groups(sentences):
+    print 'Splitting sentences into groups...'
+    groups = [g for s in sentences for g in s]
+    print '{} group in total.\n'.format(len(groups))
     return groups
-
-def stem_words(groups):
-    import Stemmer
-    stemmer = Stemmer.Stemmer(u'russian')
-
-    word_dict = {}
-    word_counter = 0
-    new_groups = []
-    i, count = 0, len(groups)
-
-    print 'Stemming and counting words in groups...'
-    for group in groups:
-        if len(group) > 1:
-            new_group = []
-            for word in group:
-                stemmed = stemmer.stemWord(word)
-                index = 0
-                if stemmed in word_dict:
-                    index = word_dict[stemmed]
-                else:
-                    word_counter += 1
-                    index = word_counter
-                    word_dict[stemmed] = index
-                    word_dict[index] = stemmed
-                new_group.append(index)
-            new_groups.append(new_group)
-        i += 1
-        print_progress(i, count)
-
-    print count, 'groups processed in total.\n'
-    unique_words_count = int(len(word_dict) / 2)
-    print 'Unique words count - {}\n'.format(unique_words_count)
-    return word_dict, new_groups
 
 def count_ngrams(groups, n=2):
     ns = range(2, n+1)
@@ -189,13 +314,13 @@ def rank_ngrams(ngram_dict, word_count, n=2, topn=10000):
     print 'Sorting by rank...'
     for k in ns:
         c = len(ranked_lists[k])
-        print ''
         print '{}-grams collected: {}\nSorting...'.format(k, c)
         ranked_lists[k].sort(key=lambda x: x[0], reverse=True)
-        print 'Keep top-{}'.format(topn)
+        print 'Keeping top-{}'.format(topn)
+        print ''
         ranked_lists[k] = ranked_lists[k][:topn]
 
-    print 'Finished sorting.'
+    print 'Finished sorting.\n'
     return ranked_lists
 
 def print_results(sorted_ranked_lists, word_dict, output_file_postfix, n, topn=0):
@@ -220,28 +345,31 @@ def print_results(sorted_ranked_lists, word_dict, output_file_postfix, n, topn=0
             print 'Top-%s %s-grams:' % (topn, k)
             for s in top:
                 print s[:-1]
-            print '-----------------------------------'
+            print '{}\n'.format('-' * 54)
 
-def find_significant_ngrams(content_file_path, output_file_postfix, n=2):
+def find_significant_ngrams(content_file_path, stopword_file, output_file_postfix, n=2):
     print 'Algorithm for finding significant ngrams in text'
     ru_lines = read_content(content_file_path)
-    groups = group_words(ru_lines)
+    num2stem_dict, stem_count_dict, sentences = split_into_sentences(ru_lines, stopword_file)
     del ru_lines
-    word_dict, stemmed = stem_words(groups)
+    dim = len(num2stem_dict)+1
+    sentences = dedup_sentences(sentences, dim, basis_size=16, threshold=0.95)
+    groups = sentences_to_groups(sentences)
+    del sentences
+    ngram_dict = count_ngrams(groups, n)
     del groups
-    ngram_dict = count_ngrams(stemmed, n)
-    del stemmed
     word_count_dict = count_ngram_words(ngram_dict, n)
-    sorted_ranked_lists = rank_ngrams(ngram_dict, word_count_dict, n)
+    sorted_ranked_lists = rank_ngrams(ngram_dict, word_count_dict, n, topn=1000)
     del ngram_dict
     del word_count_dict
-    print_results(sorted_ranked_lists, word_dict, output_file_postfix, n, topn=10)
+    print_results(sorted_ranked_lists, num2stem_dict, output_file_postfix, n, topn=50)
     print 'Successfully finished!'
 
 if __name__ == "__main__":
     import sys, time
-    if len(sys.argv) != 4:
-        print 'Usage %s "content_file" "output_file_postfix" N' % sys.argv[0]
+    arg_cnt = 5
+    if len(sys.argv) < arg_cnt:
+        print 'Usage %s "content_file" "stopword_file" "output_file_postfix" N' % sys.argv[0]
         exit(1)
-    else:
-        find_significant_ngrams(sys.argv[1], sys.argv[2], int(sys.argv[3]))
+
+    find_significant_ngrams(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]))
